@@ -12,9 +12,9 @@
       home: ['Circles', 'All circles and total saved'], listTitle: 'Your circles',
       summaryLabel: 'Saved this year', summaryValue: 'GH₵ 6,150',
       items: [
-        { t: 'Makola Traders', s: '8 members · weekly', v: 'GH₵ 2,400' },
-        { t: 'Hall 7 Roommates', s: '5 members · monthly', v: 'GH₵ 1,250' },
-        { t: 'Family Fund', s: '6 members · monthly', v: 'GH₵ 2,500' }
+        { e: '🧺', t: 'Makola Traders', s: '8 members · weekly', v: 'GH₵ 2,400' },
+        { e: '🏠', t: 'Hall 7 Roommates', s: '5 members · monthly', v: 'GH₵ 1,250' },
+        { e: '👪', t: 'Family Fund', s: '6 members · monthly', v: 'GH₵ 2,500' }
       ],
       detail: { name: 'Circle detail', desc: 'Pot, turn order, contribute', statLabel: 'Pot this round',
         rows: [['Next payout', 'Ama · Friday'], ['Your turn', 'Round 5 of 8'], ['Paid in so far', '6 of 8 members']], cta: 'Contribute' },
@@ -29,9 +29,9 @@
       home: ['Menu', 'Meals ready near you'], listTitle: 'Ready near you',
       summaryLabel: 'Pickup window', summaryValue: '12:30 to 1:00',
       items: [
-        { t: 'Jollof and grilled chicken', s: 'Night Market · 12 min', v: 'GH₵ 45' },
-        { t: 'Waakye special', s: 'Bush Canteen · 8 min', v: 'GH₵ 35' },
-        { t: 'Banku and tilapia', s: 'Central Cafeteria · 20 min', v: 'GH₵ 60' }
+        { e: '🍛', t: 'Jollof and grilled chicken', s: 'Night Market · 12 min', v: 'GH₵ 45' },
+        { e: '🍚', t: 'Waakye special', s: 'Bush Canteen · 8 min', v: 'GH₵ 35' },
+        { e: '🐟', t: 'Banku and tilapia', s: 'Central Cafeteria · 20 min', v: 'GH₵ 60' }
       ],
       detail: { name: 'Meal detail', desc: 'Kitchen, timing, order', statLabel: 'Price',
         rows: [['Kitchen', 'Night Market'], ['Ready in', 'About 12 minutes'], ['Pickup', 'Counter 3']], cta: 'Order this' },
@@ -46,9 +46,9 @@
       home: ['Sessions', 'Groups meeting this week'], listTitle: 'Sessions this week',
       summaryLabel: 'Hours revised', summaryValue: '14 h',
       items: [
-        { t: 'Calculus II past questions', s: 'Tue 4 pm · Library L2', v: '5 going' },
-        { t: 'Data Structures revision', s: 'Wed 6 pm · Lab 4', v: '8 going' },
-        { t: 'Thermodynamics problem set', s: 'Fri 2 pm · Room B12', v: '3 going' }
+        { e: '📐', t: 'Calculus II past questions', s: 'Tue 4 pm · Library L2', v: '5 going' },
+        { e: '💻', t: 'Data Structures revision', s: 'Wed 6 pm · Lab 4', v: '8 going' },
+        { e: '🔥', t: 'Thermodynamics problem set', s: 'Fri 2 pm · Room B12', v: '3 going' }
       ],
       detail: { name: 'Session detail', desc: 'Time, place, join', statLabel: 'Going',
         rows: [['When', 'Tuesday, 4:00 pm'], ['Where', 'Library, Level 2'], ['Host', 'Kojo A.']], cta: 'Join session' },
@@ -56,12 +56,46 @@
       done: { title: "You're in", sub: 'Calculus II past questions, Tuesday at 4:00 pm.' },
       activity: [['Calculus II past questions', 'Joined · today', '2 h'], ['Physics lab prep', 'Attended · Friday', '1.5 h'], ['Data Structures revision', 'Hosted · last week', '3 h']]
     },
+    events: {
+      key: 'events', kind: 'app', name: 'Gather', mark: 'G', accent: '#c2255c',
+      prompt: 'An events app where people discover local events and buy tickets.',
+      tagline: 'Find what is on. Be there.',
+      home: ['Events', 'What is on near you'], listTitle: 'On this week',
+      summaryLabel: 'Your tickets', summaryValue: '2 upcoming',
+      items: [
+        { e: '🎶', t: 'Afrobeats Night', s: 'Sat 9 pm · Osu', v: 'GH₵ 80' },
+        { e: '💡', t: 'Tech Meetup Accra', s: 'Thu 6 pm · Airport', v: 'Free' },
+        { e: '🎨', t: 'Sunday Art Market', s: 'Sun 11 am · Labone', v: 'GH₵ 20' }
+      ],
+      detail: { name: 'Event detail', desc: 'Time, place, tickets', statLabel: 'Ticket',
+        rows: [['When', 'Saturday, 9:00 pm'], ['Where', 'Osu, Oxford Street'], ['Host', 'Night Shift Live']], cta: 'Get tickets' },
+      pay: { name: 'Tickets', desc: 'Quantity and payment', label: 'How many tickets?', options: ['1', '2', '4'], method: 'Mobile money', cta: 'Pay now' },
+      done: { title: 'Tickets booked', sub: 'Two tickets for Afrobeats Night are in your wallet.' },
+      activity: [['Afrobeats Night', '2 tickets · today', 'GH₵ 160'], ['Sunday Art Market', '1 ticket · last week', 'GH₵ 20'], ['Tech Meetup Accra', 'Attended · October', 'Free']]
+    },
+    gym: {
+      key: 'gym', kind: 'app', name: 'Stride', mark: 'S', accent: '#0c8599',
+      prompt: 'A workout planner app that builds a weekly gym routine and tracks progress.',
+      tagline: 'A plan you will actually follow.',
+      home: ['Plan', 'This week at a glance'], listTitle: 'This week',
+      summaryLabel: 'Current streak', summaryValue: '12 days',
+      items: [
+        { e: '💪', t: 'Push day', s: 'Mon · 45 min', v: '6 moves' },
+        { e: '🦵', t: 'Leg day', s: 'Wed · 50 min', v: '7 moves' },
+        { e: '🏃', t: 'Core and cardio', s: 'Fri · 30 min', v: '5 moves' }
+      ],
+      detail: { name: 'Workout', desc: 'Moves, time, start', statLabel: 'Today',
+        rows: [['Focus', 'Chest and shoulders'], ['Time', '45 minutes'], ['Level', 'Intermediate']], cta: 'Start workout' },
+      pay: { name: 'Set up', desc: 'Intensity and rest', label: 'Pick your intensity', options: ['Light', 'Steady', 'Hard'], method: 'Rest timer 60 s', cta: 'Begin' },
+      done: { title: 'Workout logged', sub: 'Push day done. Your streak is now 13 days.' },
+      activity: [['Push day', 'Completed · today', '45 min'], ['Core and cardio', 'Completed · Friday', '30 min'], ['Leg day', 'Completed · Wednesday', '50 min']]
+    },
     generic: {
       key: 'generic', kind: 'app', name: 'Your concept', mark: 'C', accent: '#ff7a59',
       prompt: '', tagline: 'Your idea, on a real screen.',
       home: ['Home', 'Main list'], listTitle: 'Main list',
       summaryLabel: 'Key number', summaryValue: '128',
-      items: [{ t: 'First item', s: 'Supporting detail', v: 'Value' }, { t: 'Second item', s: 'Supporting detail', v: 'Value' }, { t: 'Third item', s: 'Supporting detail', v: 'Value' }],
+      items: [{ e: '⭐', t: 'First item', s: 'Supporting detail', v: 'Value' }, { e: '⭐', t: 'Second item', s: 'Supporting detail', v: 'Value' }, { e: '⭐', t: 'Third item', s: 'Supporting detail', v: 'Value' }],
       detail: { name: 'Detail', desc: 'One item and its action', statLabel: 'Headline figure',
         rows: [['Detail one', 'Value'], ['Detail two', 'Value'], ['Detail three', 'Value']], cta: 'Main action' },
       pay: { name: 'Action', desc: 'Options and confirm', label: 'Choose an option', options: ['Option A', 'Option B', 'Option C'], method: 'Secondary detail', cta: 'Confirm' },
@@ -75,19 +109,41 @@
       key: 'bakery', kind: 'site', name: 'Adjoa Bakes', mark: 'A', accent: '#b4552d', domain: 'adjoabakes.preview',
       prompt: 'A website for my home bakery where people can see the menu and order a cake.',
       heroTitle: 'Fresh from the oven, every morning.', heroSub: 'Small-batch bread, pastries and celebration cakes, baked to order in Accra.',
-      heroCta: 'Order a cake', listName: 'Menu',
-      points: [['Baked daily', 'Nothing sits on a shelf overnight.'], ['Made to order', 'Tell us the size, flavour and message.'], ['Pickup or delivery', 'Same-day within the city.']],
-      products: [['Butter bread', 'GH₵ 25'], ['Meat pie', 'GH₵ 12'], ['Chocolate cake', 'GH₵ 180'], ['Cinnamon rolls', 'GH₵ 40'], ['Banana loaf', 'GH₵ 35'], ['Birthday cake', 'GH₵ 250']],
+      heroCta: 'Order a cake', listName: 'Menu', art: ['🥐', '🍞', '🧁'], featured: 'Popular this week', listLead: 'Tap anything to order it.',
+      points: [['⏰', 'Baked daily', 'Nothing sits on a shelf overnight.'], ['🎂', 'Made to order', 'Tell us the size, flavour and message.'], ['🛵', 'Pickup or delivery', 'Same-day within the city.']],
+      products: [['🍞', 'Butter bread', 'GH₵ 25'], ['🥧', 'Meat pie', 'GH₵ 12'], ['🍫', 'Chocolate cake', 'GH₵ 180'], ['🥮', 'Cinnamon rolls', 'GH₵ 40'], ['🍌', 'Banana loaf', 'GH₵ 35'], ['🎂', 'Birthday cake', 'GH₵ 250']],
       story: ['Our story', 'It started with one oven and a family recipe for butter bread. Neighbours kept asking for more, so the kitchen grew.', 'Everything is still mixed by hand, in small batches, by the same three people.'],
       orderTitle: 'Order a cake', fields: ['Your name', 'Phone number', 'What would you like?'], orderCta: 'Send order',
       sent: ['Order received', 'We will call you within the hour to confirm the details.']
     },
+    portfolio: {
+      key: 'portfolio', kind: 'site', name: 'Esi Mensah', mark: 'E', accent: '#5b63d6', domain: 'esimensah.preview',
+      prompt: 'A portfolio website for a product designer to show case studies and get hired.',
+      heroTitle: 'I design calm products for busy people.', heroSub: 'Product designer in Accra. Six years across fintech, health and logistics.',
+      heroCta: 'Work with me', listName: 'Work', art: ['🎨', '✏️', '📱'], featured: 'Selected work', listLead: 'Case studies from the last three years.',
+      points: [['🔎', 'Research first', 'I talk to users before I draw anything.'], ['🧩', 'Systems thinking', 'Components that scale past the first screen.'], ['🚀', 'Ships with engineers', 'Specs that survive contact with code.']],
+      products: [['💳', 'Wallet redesign', 'Fintech'], ['🩺', 'Clinic booking', 'Health'], ['📦', 'Courier tracker', 'Logistics'], ['🎯', 'Savings goals', 'Fintech'], ['🧱', 'Design system', 'Internal'], ['✨', 'Onboarding flow', 'Growth']],
+      story: ['About', 'I started in print, moved to mobile, and stayed for the problem solving. I like projects where the hard part is deciding what to leave out.', 'Outside work I teach a weekend design class for secondary school students.'],
+      orderTitle: 'Work with me', fields: ['Your name', 'Email', 'Tell me about the project'], orderCta: 'Send message',
+      sent: ['Message sent', 'Thanks. I reply to every enquiry within two working days.']
+    },
+    salon: {
+      key: 'salon', kind: 'site', name: 'Fade Lab', mark: 'F', accent: '#b7791f', domain: 'fadelab.preview',
+      prompt: 'A website for my barbershop where customers can see services and book a slot.',
+      heroTitle: 'Sharp cuts. No waiting.', heroSub: 'Book a chair in East Legon and walk straight in.',
+      heroCta: 'Book a slot', listName: 'Services', art: ['💈', '✂️', '🪒'], featured: 'Most booked', listLead: 'Tap a service to book it.',
+      points: [['⏱️', 'Walk straight in', 'Your chair is ready at your time.'], ['✂️', 'Master barbers', 'Every barber has five years or more.'], ['🌙', 'Open late', 'Until 9 pm, seven days a week.']],
+      products: [['✂️', 'Skin fade', 'GH₵ 60'], ['🧔', 'Beard trim', 'GH₵ 30'], ['🧒', 'Kids cut', 'GH₵ 40'], ['🎨', 'Hair dye', 'GH₵ 120'], ['🪒', 'Hot towel shave', 'GH₵ 50'], ['📐', 'Line up', 'GH₵ 25']],
+      story: ['Our story', 'Fade Lab opened with two chairs and a rule: nobody waits. The booking system came first, the shop second.', 'Today there are six chairs, and the rule has not changed.'],
+      orderTitle: 'Book a slot', fields: ['Your name', 'Phone number', 'Service and preferred time'], orderCta: 'Request booking',
+      sent: ['Booking requested', 'We will text you to confirm your slot.']
+    },
     genericSite: {
       key: 'genericSite', kind: 'site', name: 'Your site', mark: 'Y', accent: '#ff7a59', domain: 'yoursite.preview',
       prompt: '', heroTitle: 'Your headline goes here.', heroSub: 'One or two lines that say what you offer and who it is for.',
-      heroCta: 'Main action', listName: 'Products',
-      points: [['First benefit', 'A short supporting line.'], ['Second benefit', 'A short supporting line.'], ['Third benefit', 'A short supporting line.']],
-      products: [['Item one', 'Price'], ['Item two', 'Price'], ['Item three', 'Price'], ['Item four', 'Price'], ['Item five', 'Price'], ['Item six', 'Price']],
+      heroCta: 'Main action', listName: 'Products', art: ['✨', '⭐', '💡'], featured: 'Featured', listLead: 'A short line about the list.',
+      points: [['⭐', 'First benefit', 'A short supporting line.'], ['⭐', 'Second benefit', 'A short supporting line.'], ['⭐', 'Third benefit', 'A short supporting line.']],
+      products: [['⭐', 'Item one', 'Price'], ['⭐', 'Item two', 'Price'], ['⭐', 'Item three', 'Price'], ['⭐', 'Item four', 'Price'], ['⭐', 'Item five', 'Price'], ['⭐', 'Item six', 'Price']],
       story: ['About', 'A paragraph about who you are and why you started.', 'A second paragraph about how you work.'],
       orderTitle: 'Get in touch', fields: ['Your name', 'Phone or email', 'Message'], orderCta: 'Send',
       sent: ['Message sent', 'This is the confirmation state for your contact form.']
@@ -119,7 +175,7 @@
   });
 
   const IDEAS = Object.assign({}, APPS, SITES);
-  const ACCENTS = ['#1f8a5b', '#e2622f', '#5b63d6', '#c2255c', '#0c8599', '#b4552d'];
+  const ACCENTS = ['#1f8a5b', '#e2622f', '#5b63d6', '#c2255c', '#0c8599', '#b4552d', '#b7791f'];
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const tick = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -155,7 +211,7 @@
           <div class="p-top"><div><small>Good to see you</small><h2>${esc(d.listTitle)}</h2></div><button class="p-avatar" data-go="profile">K</button></div>
           <div class="p-summary"><small>${esc(d.summaryLabel)}</small><b>${esc(d.summaryValue)}</b></div>
           <div class="p-list">${d.items.map((it) => `<button class="p-item" data-go="detail">
-            <span class="p-dot"></span>
+            <span class="p-dot">${it.e || ''}</span>
             <span class="p-item-text"><b>${esc(it.t)}</b><small>${esc(it.s)}</small></span>
             <span class="p-item-val">${esc(it.v)}</span></button>`).join('')}</div>
         </div>${tabBar('home')}`;
@@ -197,17 +253,18 @@
     const nav = `<nav class="s-nav"><button class="s-brand" data-go="home"><i>${esc(d.mark)}</i>${esc(d.name)}</button>
       <span class="s-links"><button data-go="menu"${key === 'menu' ? ' class="on"' : ''}>${esc(d.listName)}</button><button data-go="story"${key === 'story' ? ' class="on"' : ''}>${esc(d.story[0])}</button><button class="s-cta" data-go="order">${esc(d.heroCta)}</button></span></nav>`;
     const foot = `<footer class="s-foot"><b>${esc(d.name)}</b><span>Made with Selasi AI. Concept preview.</span></footer>`;
-    const card = (p) => `<button class="s-card" data-go="order"><i></i><b>${esc(p[0])}</b><small>${esc(p[1])}</small></button>`;
+    const card = (p) => `<button class="s-card" data-go="order"><i>${p[0]}</i><b>${esc(p[1])}</b><small>${esc(p[2])}</small></button>`;
+    const art = (cls) => `<i class="s-art${cls || ''}"><u>${d.art[0]}</u><u>${d.art[1]}</u><u>${d.art[2]}</u></i>`;
     let body;
     if (key === 'home') {
       body = `<section class="s-hero"><div><h1>${esc(d.heroTitle)}</h1><p>${esc(d.heroSub)}</p>
-          <div class="s-row"><button class="p-btn" data-go="order">${esc(d.heroCta)}</button><button class="s-ghost" data-go="menu">See the ${esc(d.listName.toLowerCase())}</button></div></div><i class="s-art"></i></section>
-        <section class="s-points">${d.points.map((p) => `<div><b>${esc(p[0])}</b><small>${esc(p[1])}</small></div>`).join('')}</section>
-        <section class="s-sec"><h2>Popular this week</h2><div class="s-grid">${d.products.slice(0, 3).map(card).join('')}</div></section>`;
+          <div class="s-row"><button class="p-btn" data-go="order">${esc(d.heroCta)}</button><button class="s-ghost" data-go="menu">See the ${esc(d.listName.toLowerCase())}</button></div></div>${art()}</section>
+        <section class="s-points">${d.points.map((p) => `<div><i>${p[0]}</i><b>${esc(p[1])}</b><small>${esc(p[2])}</small></div>`).join('')}</section>
+        <section class="s-sec"><h2>${esc(d.featured)}</h2><div class="s-grid">${d.products.slice(0, 3).map(card).join('')}</div></section>`;
     } else if (key === 'menu') {
-      body = `<section class="s-sec"><h1>${esc(d.listName)}</h1><p class="s-lead">Tap anything to order it.</p><div class="s-grid">${d.products.map(card).join('')}</div></section>`;
+      body = `<section class="s-sec"><h1>${esc(d.listName)}</h1><p class="s-lead">${esc(d.listLead)}</p><div class="s-grid">${d.products.map(card).join('')}</div></section>`;
     } else if (key === 'story') {
-      body = `<section class="s-sec narrow"><h1>${esc(d.story[0])}</h1><i class="s-art wide"></i><p>${esc(d.story[1])}</p><p>${esc(d.story[2])}</p><button class="p-btn" data-go="order">${esc(d.heroCta)}</button></section>`;
+      body = `<section class="s-sec narrow"><h1>${esc(d.story[0])}</h1>${art(' wide')}<p>${esc(d.story[1])}</p><p>${esc(d.story[2])}</p><button class="p-btn" data-go="order">${esc(d.heroCta)}</button></section>`;
     } else if (key === 'order') {
       body = `<section class="s-sec narrow"><h1>${esc(d.orderTitle)}</h1><p class="s-lead">It takes less than a minute.</p>
         ${d.fields.map((f, i) => `<div class="p-field${i === 2 ? ' area' : ''}"><small>${esc(f)}</small><b>&nbsp;</b></div>`).join('')}

@@ -66,8 +66,12 @@
             </div>
             <div class="starters" id="starters">
               <button data-idea="susu"><span data-icon="users"></span><b>Savings circle app</b><small>Friends pool money weekly</small></button>
-              <button data-idea="food"><span data-icon="bag"></span><b>Campus food pre-order</b><small>Skip the lunch queue</small></button>
               <button data-idea="bakery"><span data-icon="globe"></span><b>Bakery website</b><small>Menu and cake orders</small></button>
+              <button data-idea="food"><span data-icon="bag"></span><b>Campus food pre-order</b><small>Skip the lunch queue</small></button>
+              <button data-idea="portfolio"><span data-icon="globe"></span><b>Designer portfolio site</b><small>Case studies and contact</small></button>
+              <button data-idea="events"><span data-icon="ticket"></span><b>Events and tickets app</b><small>Discover and book</small></button>
+              <button data-idea="salon"><span data-icon="globe"></span><b>Barbershop website</b><small>Services and booking</small></button>
+              <button data-idea="gym"><span data-icon="pulse"></span><b>Workout planner app</b><small>Weekly gym routine</small></button>
               <button data-idea="study"><span data-icon="book"></span><b>Study group planner</b><small>Revise with others</small></button>
             </div>
           </div>
@@ -76,21 +80,21 @@
 
         <div class="composer-wrap">
           <div class="chips" id="chips"></div>
-          <div class="tray" id="composerTray">
-            <div class="tray-in">
+          <div class="composer-box">
+            <div class="tray" id="composerTray">
               <div class="tool-grid">
-                <button data-toast="Attach a file or screenshot. Not wired up in this concept build."><span data-icon="clip"></span>Attach</button>
-                <button data-toast="Paste existing code to preview and restyle it. Not wired up yet."><span data-icon="code"></span>Paste code</button>
-                <button data-toast="Add a link to read for layout and structure only. Not wired up yet."><span data-icon="link"></span>Add link</button>
-                <button id="searchToggle" aria-pressed="false"><span data-icon="globe"></span>Web search</button>
+                <button type="button" data-toast="Attach a file or screenshot. Not wired up in this concept build."><span data-icon="clip"></span>Attach</button>
+                <button type="button" data-toast="Paste existing code to preview and restyle it. Not wired up yet."><span data-icon="code"></span>Paste code</button>
+                <button type="button" data-toast="Add a link to read for layout and structure only. Not wired up yet."><span data-icon="link"></span>Add link</button>
+                <button type="button" id="searchToggle" aria-pressed="false"><span data-icon="globe"></span>Web search</button>
               </div>
             </div>
+            <form class="composer" id="composer">
+              <button type="button" class="ghost-btn" id="plusBtn" aria-label="More tools" aria-expanded="false"><span data-icon="plus"></span></button>
+              <textarea id="input" rows="1" placeholder="Describe your idea…" aria-label="Message"></textarea>
+              <button type="submit" class="send-btn" aria-label="Send"><span data-icon="arrowup"></span></button>
+            </form>
           </div>
-          <form class="composer" id="composer">
-            <button type="button" class="ghost-btn" id="plusBtn" aria-label="More tools" aria-expanded="false"><span data-icon="plus"></span></button>
-            <textarea id="input" rows="1" placeholder="Describe your idea…" aria-label="Message"></textarea>
-            <button type="submit" class="send-btn" aria-label="Send"><span data-icon="arrowup"></span></button>
-          </form>
           <div class="composer-meta" id="composerMeta">
             <button class="toggle-pill accent" id="renderNow" hidden><span data-icon="phone"></span>Render on device</button>
             <span class="flag" id="searchFlag" hidden><span data-icon="globe"></span>Web search on</span>
@@ -120,18 +124,16 @@
         </div>
 
         <div class="stage-foot">
-          <div class="chips stage-chips" id="stageChips"></div>
           <div class="tray" id="dockTray">
-            <div class="tray-in">
-              <div class="capture-dock" role="toolbar" aria-label="Device tools">
-                <button id="shotBtn"><span data-icon="camera"></span>Screenshot</button>
-                <button id="gifBtn"><span data-icon="film"></span>Flow GIF</button>
-                <button id="recBtn"><span data-icon="record"></span>Record<em>Pro</em></button>
-                <button id="fullBtn"><span data-icon="expand"></span>Full screen</button>
-                <button id="relockBtn"><span data-icon="lock"></span>Lock</button>
-              </div>
+            <div class="capture-dock" role="toolbar" aria-label="Device tools">
+              <button id="shotBtn"><span data-icon="camera"></span>Screenshot</button>
+              <button id="gifBtn"><span data-icon="film"></span>Flow GIF</button>
+              <button id="recBtn"><span data-icon="record"></span>Record<em>Pro</em></button>
+              <button id="fullBtn"><span data-icon="expand"></span>Full screen</button>
+              <button id="relockBtn"><span data-icon="lock"></span>Lock</button>
             </div>
           </div>
+          <button class="tray-handle only-small" id="askBtn" hidden><span data-icon="chat"></span><span class="lbl">Ask</span></button>
           <button class="tray-handle" id="dockHandle" hidden aria-expanded="false" aria-controls="dockTray"><span data-icon="chevup"></span><span class="lbl">Tools</span></button>
         </div>
       </section>
@@ -169,6 +171,19 @@
       <button class="js-settings"><span data-icon="gear"></span><span>Settings</span></button>
     </div>
   </aside>
+
+  <!-- Ask sheet: message Selasi without leaving the device -->
+  <div class="scrim clear" id="askScrim" hidden></div>
+  <div class="sheet" id="askSheet" aria-hidden="true" aria-label="Ask Selasi">
+    <i class="sheet-grab"></i>
+    <div class="sheet-head"><b>Ask Selasi</b><button class="icon-btn small" id="askClose" aria-label="Close"><span data-icon="x"></span></button></div>
+    <div class="sheet-reply" id="askReply"></div>
+    <div class="chips" id="sheetChips"></div>
+    <form class="composer" id="askForm">
+      <textarea id="askInput" rows="1" placeholder="Ask for a change…" aria-label="Message"></textarea>
+      <button type="submit" class="send-btn" aria-label="Send"><span data-icon="arrowup"></span></button>
+    </form>
+  </div>
 
   <!-- Stamina -->
   <div class="pop" id="staminaPop" hidden>

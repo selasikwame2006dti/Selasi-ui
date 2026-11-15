@@ -43,6 +43,8 @@
     download: '<path d="M12 4v11M7.5 11l4.5 4.5 4.5-4.5M5 20h14"/>',
     git: '<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5c0 4-6 3-10.500 5.500"/>',
     file: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>',
+    ticket: '<path d="M4 8a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v3a1.5 1.5 0 0 0 0 3v3a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2v-3a1.5 1.5 0 0 0 0-3z"/><path d="M14 7v10" stroke-dasharray="2 2.5"/>',
+    pulse: '<path d="M3 12h4l2.5-6 4 12 2.5-6h5"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/>'
   };
   const icon = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -242,6 +244,8 @@
     $$('.js-handoff').forEach((el) => { el.hidden = !chat.rendered; });
     $('renderNow').hidden = !(idea && !chat.rendered);
     $('dockHandle').hidden = !chat.rendered;
+    $('askBtn').hidden = !chat.rendered;
+    if (!chat.rendered) closeAsk();
     if (!chat.rendered) setTray($('dockTray'), $('dockHandle'), false);
     $('deviceTabs').querySelector('[data-device="laptop"]').hidden = !site;
     if (!site && ui.device === 'laptop') ui.device = settings.device;
@@ -273,16 +277,19 @@
     toBottom();
     return el;
   }
+  const TYPING = '<span class="typing"><i></i><i></i><i></i></span>';
   async function say(html) {
-    const el = addBlock('<span class="typing"><i></i><i></i><i></i></span>', 'msg ai');
+    const el = addBlock(TYPING, 'msg ai');
+    if (askOpen()) $('askReply').innerHTML = TYPING;
     await wait(650);
     el.innerHTML = html;
     el.classList.add('pop-in');
     paintIcons(el);
     toBottom();
-    if (onDeviceView()) {
+    if (askOpen()) $('askReply').innerHTML = el.innerHTML;
+    else if (onDeviceView()) {
       document.querySelector('.view-switch [data-view="chat"]').classList.add('has-new');
-      toast(el.textContent.replace(/\s+/g, ' ').trim().slice(0, 110));
+      toast(el.textContent.replace(/\s+/g, ' ').trim().split('. ')[0].slice(0, 90));
     }
     return el;
   }
@@ -290,19 +297,53 @@
     chat.chips = list || [];
     const html = chat.chips.map((c) => `<button data-say="${esc(c)}">${esc(c)}</button>`).join('');
     $('chips').innerHTML = html;
-    $('stageChips').innerHTML = chat.rendered ? html : '';
+    $('sheetChips').innerHTML = html;
     toBottom();
   }
   function onChip(e) { const b = e.target.closest('button[data-say]'); if (b) handleUser(b.dataset.say); }
   $('chips').addEventListener('click', onChip);
-  $('stageChips').addEventListener('click', onChip);
+  $('sheetChips').addEventListener('click', onChip);
+  messages.addEventListener('click', (e) => { const t = e.target.closest('.tool.done'); if (t) t.classList.toggle('open'); });
+
+  /* ── Ask sheet: message Selasi from the device pane ────────────────── */
+  const askSheet = $('askSheet'), askInput = $('askInput');
+  function askOpen() { return askSheet.classList.contains('open'); }
+  function openAsk() {
+    setTray($('dockTray'), $('dockHandle'), false);
+    const last = $$('.msg.ai', messages).pop();
+    $('askReply').innerHTML = last ? last.innerHTML : 'Tell me what to change.';
+    askSheet.classList.add('open');
+    askSheet.setAttribute('aria-hidden', 'false');
+    $('askScrim').hidden = false;
+  }
+  function closeAsk() {
+    askSheet.classList.remove('open');
+    askSheet.setAttribute('aria-hidden', 'true');
+    $('askScrim').hidden = true;
+    askInput.blur();
+  }
+  $('askBtn').addEventListener('click', openAsk);
+  $('askClose').addEventListener('click', closeAsk);
+  $('askScrim').addEventListener('click', closeAsk);
+  $('askForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = askInput.value;
+    if (!v.trim() || ui.busy) return;
+    askInput.value = '';
+    handleUser(v);
+  });
+  small.addEventListener('change', (e) => { if (!e.matches) closeAsk(); });
 
   /* ── Scripted replies ──────────────────────────────────────────────── */
   function pickIdea(text) {
     const t = text.toLowerCase(), I = Proto.IDEAS;
     if (/bak|cake|bread|pastr/.test(t)) return I.bakery;
-    if (/web ?site|landing|web ?page|portfolio|\bsite\b|\bblog\b/.test(t)) return I.genericSite;
+    if (/barber|salon|haircut|book a slot/.test(t)) return I.salon;
+    if (/portfolio|designer|case stud/.test(t)) return I.portfolio;
+    if (/web ?site|landing|web ?page|\bsite\b|\bblog\b/.test(t)) return I.genericSite;
     if (/susu|sav|circle|pool|contribut/.test(t)) return I.susu;
+    if (/gym|workout|fitness|exercise/.test(t)) return I.gym;
+    if (/event|ticket|concert/.test(t)) return I.events;
     if (/food|order|lunch|chop|canteen|meal|restaurant/.test(t)) return I.food;
     if (/study|revis|course|class|planner/.test(t)) return I.study;
     return I.generic;
@@ -397,7 +438,7 @@
         await replyPlan();
       } else if (/hand ?off|coder|export|build it/.test(t)) {
         if (!chat.rendered) { await say('Render it first, then I can package the plan and screens for Coder.'); setChips(['Render it on the device']); }
-        else { await say('Here is the package Coder will receive. Review the plan and the handoff record before you send it.'); setChips(afterRender()); openHandoff(); }
+        else { await say('Here is the package Coder will receive. Review the plan and the handoff record before you send it.'); setChips(afterRender()); closeAsk(); openHandoff(); }
       } else if (/search|reference|research|source|look up/.test(t) || (ui.search && !/render|dark|light|accent|colou?r/.test(t))) {
         await search();
       } else if (/dark|light|accent|colou?r|palette/.test(t)) {
@@ -458,6 +499,7 @@
   function newChat() {
     if (ui.busy) { toast('Wait for the reply to finish first.'); return; }
     closeSide();
+    closeAsk();
     exitImmersive();
     if (!chat.idea) { setView('chat'); input.focus(); return; }
     const c = blankChat();
@@ -666,6 +708,7 @@ ${idea.screens.map((s, i) => '- ' + path(s, i)).join('\n')}
     if (e.key !== 'Escape') return;
     if (!immersive.hidden) return exitImmersive();
     if (!$('handoffModal').hidden) return closeHandoff();
+    if (askOpen()) return closeAsk();
     if (!$('settings').hidden) return closeSettings();
     pop.hidden = true;
     closeSide();
