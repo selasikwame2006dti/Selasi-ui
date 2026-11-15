@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Selasi AI</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/device-lockscreens.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script>
+    (function () {
+      var mode = null;
+      try { mode = localStorage.getItem('selasi-mode'); } catch (e) {}
+      if (!mode) mode = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.dataset.mode = mode;
+    })();
+  </script>
+</head>
+<body data-view="chat">
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/favicon.svg" alt="" class="brand-mark">
+      <span class="brand-name">Selasi <b>AI</b></span>
+      <button class="project-chip" id="projectChip" title="Current idea">
+        <span data-icon="spark"></span><span id="projectName">New idea</span>
+      </button>
+    </div>
+
+    <nav class="device-tabs" id="deviceTabs" aria-label="Device">
+      <button data-device="iphone" class="active">iPhone 15 Pro</button>
+      <button data-device="android">Samsung S26 Ultra</button>
+      <button data-device="tablet">iPad Pro 11"</button>
+    </nav>
+
+    <div class="top-actions">
+      <div class="usage" id="usage" title="Daily usage on the Free plan">
+        <svg viewBox="0 0 36 36" class="usage-ring" aria-hidden="true">
+          <circle cx="18" cy="18" r="15" class="usage-track"/>
+          <circle cx="18" cy="18" r="15" class="usage-fill" id="usageFill"/>
+        </svg>
+        <span><b id="usageVal">0.00</b> / 0.30 today</span>
+      </div>
+      <button class="icon-btn" id="modeBtn" aria-label="Switch light or dark mode"><span data-icon="moon"></span></button>
+      <button class="handoff-btn" id="handoffBtn"><span data-icon="send"></span><span class="label">Hand off to Coder</span></button>
+    </div>
+  </header>
+
+  <main class="workspace">
+
+    <section class="chat" aria-label="Chat">
+      <div class="chat-scroll" id="chatScroll">
+        <div class="welcome" id="welcome">
+          <h1>What are we imagining today?</h1>
+          <p>Describe an app idea. Ask me to render it and you can tap through it on a real device.</p>
+          <div class="starters" id="starters">
+            <button data-idea="susu">
+              <span data-icon="users"></span>
+              <b>A savings circle app</b>
+              <small>Friends pool money every week</small>
+            </button>
+            <button data-idea="food">
+              <span data-icon="bag"></span>
+              <b>Campus food pre-order</b>
+              <small>Skip the lunch queue</small>
+            </button>
+            <button data-idea="study">
+              <span data-icon="book"></span>
+              <b>A study group planner</b>
+              <small>Find people revising the same thing</small>
+            </button>
+          </div>
+        </div>
+        <div class="messages" id="messages" aria-live="polite"></div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="chips" id="chips"></div>
+        <form class="composer" id="composer">
+          <button type="button" class="ghost-btn" id="attachBtn" aria-label="Attach code, a link or a screenshot"><span data-icon="clip"></span></button>
+          <textarea id="input" rows="1" placeholder="Describe your idea…" aria-label="Message"></textarea>
+          <button type="submit" class="send-btn" aria-label="Send"><span data-icon="send"></span></button>
+        </form>
+        <div class="composer-meta">
+          <button class="toggle-pill" id="searchToggle" aria-pressed="false"><span data-icon="globe"></span>Web search</button>
+          <button class="toggle-pill accent" id="renderNow" disabled><span data-icon="phone"></span>Render on device</button>
+          <span class="note">Concept build. Replies are scripted.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage" aria-label="Device preview">
+      <div class="stage-head">
+        <span class="state-pill" id="statePill"><i></i><span>Lock screen</span></span>
+        <button class="mini-btn" id="relockBtn" hidden><span data-icon="lock"></span>Lock</button>
+      </div>
+
+      <div class="stage-body">
+        <div class="device" id="device" data-device="iphone">
+          <div class="dev-art" id="devArt" aria-hidden="true"></div>
+          <div class="dev-screen" id="devScreen"></div>
+          <div class="dev-cutout" id="devCutout" aria-hidden="true"></div>
+          <div class="dev-lock" id="devLock"></div>
+          <div class="dev-flash" id="devFlash"></div>
+        </div>
+      </div>
+
+      <div class="stage-foot">
+        <div class="capture-dock" role="toolbar" aria-label="Capture">
+          <button id="shotBtn"><span data-icon="camera"></span>Screenshot<em>1K</em></button>
+          <button id="gifBtn"><span data-icon="film"></span>Flow GIF<em>Free</em></button>
+          <button id="recBtn" class="locked"><span data-icon="record"></span>Record<em>Pro</em></button>
+        </div>
+        <span class="caption" id="caption">iPhone 15 Pro · Lock screen</span>
+      </div>
+    </section>
+
+    <aside class="flow" aria-label="Flow">
+      <div class="flow-head">
+        <h2>Flow</h2>
+        <span id="flowCount">No screens yet</span>
+      </div>
+      <div class="flow-list" id="flowList">
+        <p class="flow-empty">Screens and the taps that connect them appear here once you render an idea.</p>
+      </div>
+    </aside>
+
+  </main>
+
+  <nav class="view-switch" aria-label="View">
+    <button data-view="chat" class="active"><span data-icon="chat"></span>Chat</button>
+    <button data-view="device"><span data-icon="phone"></span>Device</button>
+  </nav>
+
+  <div class="modal" id="handoffModal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="handoffTitle">
+      <div class="modal-head">
+        <h2 id="handoffTitle">Hand off to Selasi Coder</h2>
+        <button class="icon-btn small" id="handoffClose" aria-label="Close"><span data-icon="x"></span></button>
+      </div>
+      <p class="modal-sub">Coder reads the plan first, then the handoff record and files, and asks before assuming if they disagree.</p>
+      <div class="handoff-grid">
+        <ul class="file-list" id="fileList"></ul>
+        <pre class="file-preview" id="filePreview"></pre>
+      </div>
+      <div class="modal-actions">
+        <button class="soft-btn" data-toast="Download would start here, with your permission."><span data-icon="download"></span>Download</button>
+        <button class="soft-btn" data-toast="Push to GitHub is not wired up in this concept build."><span data-icon="git"></span>Push to GitHub</button>
+        <button class="handoff-btn" data-toast="Handoff package prepared. Opening Selasi Coder is not wired up yet."><span data-icon="send"></span>Open in Selasi Coder</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="assets/js/device-lockscreens.js"></script>
+  <script src="assets/js/prototype.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

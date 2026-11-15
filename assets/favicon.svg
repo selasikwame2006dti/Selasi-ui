@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A433A" />
+      <stop offset="100%" stop-color="#0A1D19" />
+    </linearGradient>
+    <linearGradient id="topGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF6044" />
+      <stop offset="100%" stop-color="#FF8A6C" />
+    </linearGradient>
+    <linearGradient id="botGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#EFE5D1" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)" />
+  <text x="256" y="455" font-family="monospace, Courier New, Consolas" font-size="22" font-weight="bold" fill="#FDF6E3" opacity="0.3" text-anchor="middle" letter-spacing="8">{ SLS }</text>
+  <path d="M 212 264 L 352 320 L 172 392"
+        stroke="url(#botGrad)" stroke-width="52" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#shadow)" />
+  <path d="M 340 120 L 160 192 L 300 248"
+        stroke="url(#topGrad)" stroke-width="52" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#shadow)" />
+</svg>
