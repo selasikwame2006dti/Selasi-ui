@@ -15,133 +15,226 @@
   <link rel="stylesheet" href="assets/css/app.css">
   <script>
     (function () {
-      var mode = null;
-      try { mode = localStorage.getItem('selasi-mode'); } catch (e) {}
-      if (!mode) mode = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('selasi-settings') || '{}'); } catch (e) {}
+      var mode = s.mode || 'system';
+      if (mode === 'system') mode = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
       document.documentElement.dataset.mode = mode;
+      document.documentElement.dataset.accent = s.accent || 'coral';
     })();
   </script>
 </head>
-<body data-view="chat">
+<body data-view="chat" class="is-empty">
 
-  <header class="topbar">
-    <div class="brand">
-      <img src="assets/favicon.svg" alt="" class="brand-mark">
-      <span class="brand-name">Selasi <b>AI</b></span>
-      <button class="project-chip" id="projectChip" title="Current idea">
-        <span data-icon="spark"></span><span id="projectName">New idea</span>
-      </button>
-    </div>
-
-    <nav class="device-tabs" id="deviceTabs" aria-label="Device">
-      <button data-device="iphone" class="active"><span class="long">iPhone 15 Pro</span><span class="short">iPhone</span></button>
-      <button data-device="android"><span class="long">Samsung S26 Ultra</span><span class="short">Samsung</span></button>
-      <button data-device="tablet"><span class="long">iPad Pro 11"</span><span class="short">iPad</span></button>
-    </nav>
-
-    <div class="top-actions">
-      <div class="usage" id="usage" title="Daily usage on the Free plan">
-        <svg viewBox="0 0 36 36" class="usage-ring" aria-hidden="true">
-          <circle cx="18" cy="18" r="15" class="usage-track"/>
-          <circle cx="18" cy="18" r="15" class="usage-fill" id="usageFill"/>
-        </svg>
-        <span><b id="usageVal">0.00</b> / 0.30 today</span>
-      </div>
-      <button class="icon-btn" id="modeBtn" aria-label="Switch light or dark mode"><span data-icon="moon"></span></button>
-      <button class="handoff-btn" id="handoffBtn"><span data-icon="send"></span><span class="label">Hand off to Coder</span></button>
-    </div>
+  <!-- Phone app bar -->
+  <header class="appbar">
+    <button class="icon-btn" id="menuBtn" aria-label="Open menu"><span data-icon="menu"></span></button>
+    <span class="appbar-title js-title">Selasi AI</span>
+    <button class="icon-btn js-handoff" hidden aria-label="Hand off to Coder"><span data-icon="send"></span></button>
+    <button class="stamina-btn js-stamina" aria-label="Stamina"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" class="st-track"/><circle cx="18" cy="18" r="14" class="st-fill"/></svg><span data-icon="bolt"></span></button>
+    <button class="icon-btn js-new" aria-label="New chat"><span data-icon="plus"></span></button>
   </header>
 
-  <main class="workspace">
+  <div class="shell">
 
-    <section class="chat" aria-label="Chat">
-      <div class="chat-scroll" id="chatScroll">
-        <div class="welcome" id="welcome">
-          <h1>What are we imagining today?</h1>
-          <p>Describe an app idea. Ask me to render it and you can tap through it on a real device.</p>
-          <div class="starters" id="starters">
-            <button data-idea="susu">
-              <span data-icon="users"></span>
-              <b>A savings circle app</b>
-              <small>Friends pool money every week</small>
-            </button>
-            <button data-idea="food">
-              <span data-icon="bag"></span>
-              <b>Campus food pre-order</b>
-              <small>Skip the lunch queue</small>
-            </button>
-            <button data-idea="study">
-              <span data-icon="book"></span>
-              <b>A study group planner</b>
-              <small>Find people revising the same thing</small>
-            </button>
+    <!-- Desktop rail -->
+    <nav class="rail" aria-label="Main">
+      <img src="assets/favicon.svg" alt="Selasi AI" class="rail-logo">
+      <button class="rail-btn primary js-new" data-tip="New chat" aria-label="New chat"><span data-icon="plus"></span></button>
+      <button class="rail-btn" data-side="chats" data-tip="Chats" aria-label="Chats"><span data-icon="chat"></span></button>
+      <button class="rail-btn" data-side="projects" data-tip="Projects" aria-label="Projects"><span data-icon="grid"></span></button>
+      <button class="rail-btn" data-side="patterns" data-tip="Patterns" aria-label="Patterns"><span data-icon="layers"></span></button>
+      <span class="rail-gap"></span>
+      <button class="stamina-btn js-stamina" data-tip="Stamina" aria-label="Stamina"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" class="st-track"/><circle cx="18" cy="18" r="14" class="st-fill"/></svg><span data-icon="bolt"></span></button>
+      <button class="rail-btn js-settings" data-tip="Settings" aria-label="Settings"><span data-icon="gear"></span></button>
+    </nav>
+
+    <main class="workspace">
+
+      <section class="chat" aria-label="Chat">
+        <div class="chat-head">
+          <span class="chat-title js-title">New idea</span>
+          <button class="handoff-btn js-handoff" hidden><span data-icon="send"></span>Hand off to Coder</button>
+        </div>
+
+        <div class="chat-scroll" id="chatScroll">
+          <div class="welcome" id="welcome">
+            <div class="hero">
+              <img src="assets/favicon.svg" alt="" class="hero-mark">
+              <h1>What are we imagining today?</h1>
+              <p>Describe an idea. Ask me to render it and tap through it on a real device.</p>
+            </div>
+            <div class="starters" id="starters">
+              <button data-idea="susu"><span data-icon="users"></span><b>Savings circle app</b><small>Friends pool money weekly</small></button>
+              <button data-idea="food"><span data-icon="bag"></span><b>Campus food pre-order</b><small>Skip the lunch queue</small></button>
+              <button data-idea="bakery"><span data-icon="globe"></span><b>Bakery website</b><small>Menu and cake orders</small></button>
+              <button data-idea="study"><span data-icon="book"></span><b>Study group planner</b><small>Revise with others</small></button>
+            </div>
+          </div>
+          <div class="messages" id="messages" aria-live="polite"></div>
+        </div>
+
+        <div class="composer-wrap">
+          <div class="chips" id="chips"></div>
+          <div class="tray" id="composerTray">
+            <div class="tray-in">
+              <div class="tool-grid">
+                <button data-toast="Attach a file or screenshot. Not wired up in this concept build."><span data-icon="clip"></span>Attach</button>
+                <button data-toast="Paste existing code to preview and restyle it. Not wired up yet."><span data-icon="code"></span>Paste code</button>
+                <button data-toast="Add a link to read for layout and structure only. Not wired up yet."><span data-icon="link"></span>Add link</button>
+                <button id="searchToggle" aria-pressed="false"><span data-icon="globe"></span>Web search</button>
+              </div>
+            </div>
+          </div>
+          <form class="composer" id="composer">
+            <button type="button" class="ghost-btn" id="plusBtn" aria-label="More tools" aria-expanded="false"><span data-icon="plus"></span></button>
+            <textarea id="input" rows="1" placeholder="Describe your idea…" aria-label="Message"></textarea>
+            <button type="submit" class="send-btn" aria-label="Send"><span data-icon="arrowup"></span></button>
+          </form>
+          <div class="composer-meta" id="composerMeta">
+            <button class="toggle-pill accent" id="renderNow" hidden><span data-icon="phone"></span>Render on device</button>
+            <span class="flag" id="searchFlag" hidden><span data-icon="globe"></span>Web search on</span>
           </div>
         </div>
-        <div class="messages" id="messages" aria-live="polite"></div>
-      </div>
+      </section>
 
-      <div class="composer-wrap">
-        <div class="chips" id="chips"></div>
-        <form class="composer" id="composer">
-          <button type="button" class="ghost-btn" id="attachBtn" aria-label="Attach code, a link or a screenshot"><span data-icon="clip"></span></button>
-          <textarea id="input" rows="1" placeholder="Describe your idea…" aria-label="Message"></textarea>
-          <button type="submit" class="send-btn" aria-label="Send"><span data-icon="send"></span></button>
-        </form>
-        <div class="composer-meta">
-          <button class="toggle-pill" id="searchToggle" aria-pressed="false"><span data-icon="globe"></span>Web search</button>
-          <button class="toggle-pill accent" id="renderNow" disabled><span data-icon="phone"></span>Render on device</button>
-          <span class="note">Concept build. Replies are scripted.</span>
+      <section class="stage" aria-label="Device preview">
+        <div class="stage-head">
+          <span class="state-pill" id="statePill" hidden><i></i><span></span></span>
+          <nav class="device-tabs" id="deviceTabs" aria-label="Device">
+            <button data-device="iphone" class="active"><span class="long">iPhone 15 Pro</span><span class="short">iPhone</span></button>
+            <button data-device="android"><span class="long">Samsung S26 Ultra</span><span class="short">Samsung</span></button>
+            <button data-device="tablet"><span class="long">iPad Pro 11"</span><span class="short">iPad</span></button>
+            <button data-device="laptop" hidden><span class="long">Laptop</span><span class="short">Laptop</span></button>
+          </nav>
         </div>
-      </div>
-    </section>
 
-    <section class="stage" aria-label="Device preview">
-      <div class="stage-head">
-        <span class="state-pill" id="statePill"><i></i><span>Lock screen</span></span>
-        <div class="stage-tools">
-          <button class="mini-btn only-small" id="fullBtn" hidden><span data-icon="expand"></span>Full screen</button>
-          <button class="mini-btn" id="relockBtn" hidden><span data-icon="lock"></span>Lock</button>
+        <div class="stage-body">
+          <div class="device" id="device" data-device="iphone">
+            <div class="dev-art" id="devArt" aria-hidden="true"></div>
+            <div class="dev-screen" id="devScreen"></div>
+            <div class="dev-cutout" id="devCutout" aria-hidden="true"></div>
+            <div class="dev-lock" id="devLock"></div>
+            <div class="dev-flash" id="devFlash"></div>
+          </div>
         </div>
-      </div>
 
-      <div class="stage-body">
-        <div class="device" id="device" data-device="iphone">
-          <div class="dev-art" id="devArt" aria-hidden="true"></div>
-          <div class="dev-screen" id="devScreen"></div>
-          <div class="dev-cutout" id="devCutout" aria-hidden="true"></div>
-          <div class="dev-lock" id="devLock"></div>
-          <div class="dev-flash" id="devFlash"></div>
+        <div class="stage-foot">
+          <div class="chips stage-chips" id="stageChips"></div>
+          <div class="tray" id="dockTray">
+            <div class="tray-in">
+              <div class="capture-dock" role="toolbar" aria-label="Device tools">
+                <button id="shotBtn"><span data-icon="camera"></span>Screenshot</button>
+                <button id="gifBtn"><span data-icon="film"></span>Flow GIF</button>
+                <button id="recBtn"><span data-icon="record"></span>Record<em>Pro</em></button>
+                <button id="fullBtn"><span data-icon="expand"></span>Full screen</button>
+                <button id="relockBtn"><span data-icon="lock"></span>Lock</button>
+              </div>
+            </div>
+          </div>
+          <button class="tray-handle" id="dockHandle" hidden aria-expanded="false" aria-controls="dockTray"><span data-icon="chevup"></span><span class="lbl">Tools</span></button>
         </div>
-      </div>
+      </section>
 
-      <div class="stage-foot">
-        <div class="chips stage-chips" id="stageChips"></div>
-        <div class="capture-dock" role="toolbar" aria-label="Capture">
-          <button id="shotBtn"><span data-icon="camera"></span>Screenshot<em>1K</em></button>
-          <button id="gifBtn"><span data-icon="film"></span>Flow GIF<em>Free</em></button>
-          <button id="recBtn" class="locked"><span data-icon="record"></span>Record<em>Pro</em></button>
-        </div>
-        <span class="caption" id="caption">iPhone 15 Pro · Lock screen</span>
-      </div>
-    </section>
+      <aside class="flow" aria-label="Flow">
+        <div class="flow-head"><h2>Flow</h2><span id="flowCount"></span></div>
+        <div class="flow-list" id="flowList"></div>
+      </aside>
 
-    <aside class="flow" aria-label="Flow">
-      <div class="flow-head">
-        <h2>Flow</h2>
-        <span id="flowCount">No screens yet</span>
-      </div>
-      <div class="flow-list" id="flowList">
-        <p class="flow-empty">Screens and the taps that connect them appear here once you render an idea.</p>
-      </div>
-    </aside>
-
-  </main>
+    </main>
+  </div>
 
   <nav class="view-switch" aria-label="View">
     <button data-view="chat" class="active"><span data-icon="chat"></span>Chat</button>
     <button data-view="device"><span data-icon="phone"></span>Device</button>
   </nav>
 
+  <!-- Side panel: chats, projects, patterns -->
+  <div class="scrim" id="scrim" hidden></div>
+  <aside class="side" id="side" aria-label="Library" aria-hidden="true">
+    <div class="side-head">
+      <img src="assets/favicon.svg" alt="" class="brand-mark">
+      <b>Selasi <i>AI</i></b>
+      <button class="icon-btn small" id="sideClose" aria-label="Close"><span data-icon="x"></span></button>
+    </div>
+    <button class="new-chat js-new"><span data-icon="plus"></span>New chat</button>
+    <div class="seg" id="sideTabs" role="tablist">
+      <button data-tab="chats" class="active">Chats</button>
+      <button data-tab="projects">Projects</button>
+      <button data-tab="patterns">Patterns</button>
+    </div>
+    <div class="side-body" id="sideBody"></div>
+    <div class="side-foot">
+      <button class="js-stamina"><span data-icon="bolt"></span><span>Stamina</span><span class="mini-bar"><i class="js-stbar"></i></span></button>
+      <button class="js-settings"><span data-icon="gear"></span><span>Settings</span></button>
+    </div>
+  </aside>
+
+  <!-- Stamina -->
+  <div class="pop" id="staminaPop" hidden>
+    <div class="pop-head"><span data-icon="bolt"></span><b>Stamina</b><span class="plan-tag">Free</span></div>
+    <div class="st-bar"><i class="js-stbar"></i></div>
+    <p class="st-line"><b id="stPct">100%</b> left today</p>
+    <p class="st-sub">Refills every day. Each chat and render uses a little, paced across 5-hour windows.</p>
+    <button class="soft-btn wide" id="stMore">Get more stamina</button>
+  </div>
+
+  <!-- Settings -->
+  <div class="page" id="settings" hidden>
+    <div class="page-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="page-head">
+        <button class="icon-btn small" id="settingsClose" aria-label="Back"><span data-icon="back"></span></button>
+        <h2 id="settingsTitle">Settings</h2>
+      </div>
+      <div class="page-body">
+        <section>
+          <h3>Appearance</h3>
+          <div class="row"><div><b>Theme</b><small>Follow your device or pick one</small></div>
+            <div class="seg" data-setting="mode"><button data-val="system">System</button><button data-val="light">Light</button><button data-val="dark">Dark</button></div></div>
+          <div class="row"><div><b>Accent</b><small>Used for highlights and active states</small></div>
+            <div class="swatches" data-setting="accent"><button data-val="coral" style="--c:#ff7a59" aria-label="Coral"></button><button data-val="cyan" style="--c:#19b8d1" aria-label="Cyan"></button><button data-val="violet" style="--c:#8b7cf6" aria-label="Violet"></button><button data-val="green" style="--c:#3fb37f" aria-label="Green"></button></div></div>
+        </section>
+        <section>
+          <h3>Device</h3>
+          <div class="row"><div><b>Default device</b><small>What new chats open with</small></div>
+            <div class="seg" data-setting="device"><button data-val="iphone">iPhone</button><button data-val="android">Samsung</button><button data-val="tablet">iPad</button></div></div>
+          <div class="row"><div><b>Unlock animation</b><small>Play the lock screen reveal when a prototype loads</small></div>
+            <button class="switch" data-setting="unlockAnim" role="switch"></button></div>
+        </section>
+        <section>
+          <h3>Chat</h3>
+          <div class="row"><div><b>Enter sends the message</b><small>Shift and Enter adds a new line</small></div>
+            <button class="switch" data-setting="enterSend" role="switch"></button></div>
+          <div class="row"><div><b>Web search by default</b><small>Search and cite sources without being asked</small></div>
+            <button class="switch" data-setting="search" role="switch"></button></div>
+        </section>
+        <section id="planSection">
+          <h3>Plan and stamina</h3>
+          <div class="plan-now"><div><b>Free plan</b><small><span id="stPct2">100%</span> stamina left today</small></div><div class="st-bar"><i class="js-stbar"></i></div></div>
+          <div class="plans">
+            <button data-toast="Top-ups are not wired up in this concept build."><b>Top up</b><span>GH₵ 20</span><small>Pay as you go</small></button>
+            <button data-toast="Plans are not wired up in this concept build."><b>Starter</b><span>GH₵ 150</span><small>per month</small></button>
+            <button data-toast="Plans are not wired up in this concept build."><b>Pro</b><span>GH₵ 250</span><small>per month</small></button>
+          </div>
+          <p class="hint">Stamina is shared with Selasi Coder.</p>
+        </section>
+        <section>
+          <h3>Captures</h3>
+          <div class="row"><div><b>Screenshot size</b><small>2K and above is for paid plans</small></div>
+            <div class="seg" data-setting="shot"><button data-val="1k">1K</button><button data-val="2k" data-locked>2K</button></div></div>
+        </section>
+        <section>
+          <h3>Privacy</h3>
+          <p class="hint">Selasi reads only what you give it for the task. Chats in this concept build stay in this browser tab.</p>
+          <div class="row"><div><b>Clear all chats</b><small>Removes every chat and project from this tab</small></div>
+            <button class="soft-btn danger" id="clearChats"><span data-icon="trash"></span>Clear</button></div>
+        </section>
+        <p class="hint center">Selasi AI concept build. Replies are scripted.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Handoff -->
   <div class="modal" id="handoffModal" hidden>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="handoffTitle">
       <div class="modal-head">

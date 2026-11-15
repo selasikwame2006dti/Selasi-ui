@@ -1,204 +1,280 @@
 /* Selasi AI concept build: the sample prototypes that render inside the
-   device frame. Every size is in em so one layout scales with the frame. */
+   device frame. Apps fill the screen; sites open inside browser chrome.
+   Every size is in em so one layout scales with the frame. */
 (function () {
   'use strict';
 
-  const IDEAS = {
+  const APPS = {
     susu: {
-      key: 'susu',
-      name: 'SusuCircle',
+      key: 'susu', kind: 'app', name: 'SusuCircle', mark: 'S', accent: '#1f8a5b',
       prompt: 'A savings circle app where friends pool money every week and take turns receiving the pot.',
       tagline: 'Save together. Reach it sooner.',
-      accent: '#1f8a5b',
-      mark: 'S',
-      listTitle: 'Your circles',
-      summaryLabel: 'Saved this year',
-      summaryValue: 'GH₵ 6,150',
+      home: ['Circles', 'All circles and total saved'], listTitle: 'Your circles',
+      summaryLabel: 'Saved this year', summaryValue: 'GH₵ 6,150',
       items: [
         { t: 'Makola Traders', s: '8 members · weekly', v: 'GH₵ 2,400' },
         { t: 'Hall 7 Roommates', s: '5 members · monthly', v: 'GH₵ 1,250' },
         { t: 'Family Fund', s: '6 members · monthly', v: 'GH₵ 2,500' }
       ],
-      detail: {
-        statLabel: 'Pot this round',
-        rows: [['Next payout', 'Ama · Friday'], ['Your turn', 'Round 5 of 8'], ['Paid in so far', '6 of 8 members']],
-        cta: 'Contribute GH₵ 50'
-      },
-      done: { title: 'Contribution sent', sub: 'GH₵ 50 added to Makola Traders. Ama receives the pot on Friday.' },
-      screens: [
-        ['Welcome', 'Intro and get started'],
-        ['Circles', 'All circles and total saved'],
-        ['Circle detail', 'Pot, turn order, contribute'],
-        ['Confirmation', 'Contribution receipt']
-      ]
+      detail: { name: 'Circle detail', desc: 'Pot, turn order, contribute', statLabel: 'Pot this round',
+        rows: [['Next payout', 'Ama · Friday'], ['Your turn', 'Round 5 of 8'], ['Paid in so far', '6 of 8 members']], cta: 'Contribute' },
+      pay: { name: 'Contribute', desc: 'Pick an amount and confirm', label: 'How much this week?', options: ['GH₵ 20', 'GH₵ 50', 'GH₵ 100'], method: 'Mobile money', cta: 'Confirm contribution' },
+      done: { title: 'Contribution sent', sub: 'Added to Makola Traders. Ama receives the pot on Friday.' },
+      activity: [['Contribution', 'Makola Traders · today', '− GH₵ 50'], ['Payout received', 'Family Fund · 2 Nov', '+ GH₵ 2,500'], ['Contribution', 'Hall 7 Roommates · 1 Nov', '− GH₵ 250']]
     },
     food: {
-      key: 'food',
-      name: 'QuickChop',
+      key: 'food', kind: 'app', name: 'QuickChop', mark: 'Q', accent: '#e2622f',
       prompt: 'A campus food pre-order app so students can order ahead and skip the lunch queue.',
       tagline: 'Order ahead. Skip the queue.',
-      accent: '#e2622f',
-      mark: 'Q',
-      listTitle: 'Ready near you',
-      summaryLabel: 'Pickup window',
-      summaryValue: '12:30 to 1:00',
+      home: ['Menu', 'Meals ready near you'], listTitle: 'Ready near you',
+      summaryLabel: 'Pickup window', summaryValue: '12:30 to 1:00',
       items: [
         { t: 'Jollof and grilled chicken', s: 'Night Market · 12 min', v: 'GH₵ 45' },
         { t: 'Waakye special', s: 'Bush Canteen · 8 min', v: 'GH₵ 35' },
         { t: 'Banku and tilapia', s: 'Central Cafeteria · 20 min', v: 'GH₵ 60' }
       ],
-      detail: {
-        statLabel: 'Price',
-        rows: [['Kitchen', 'Night Market'], ['Ready in', 'About 12 minutes'], ['Pickup', 'Counter 3']],
-        cta: 'Place order'
-      },
+      detail: { name: 'Meal detail', desc: 'Kitchen, timing, order', statLabel: 'Price',
+        rows: [['Kitchen', 'Night Market'], ['Ready in', 'About 12 minutes'], ['Pickup', 'Counter 3']], cta: 'Order this' },
+      pay: { name: 'Checkout', desc: 'Portion size and payment', label: 'Choose a portion', options: ['Regular', 'Large', 'Sharing'], method: 'Mobile money', cta: 'Place order' },
       done: { title: 'Order placed', sub: 'Your jollof will be ready at Counter 3 in about 12 minutes.' },
-      screens: [
-        ['Welcome', 'Intro and get started'],
-        ['Menu', 'Meals ready near you'],
-        ['Meal detail', 'Kitchen, timing, order'],
-        ['Confirmation', 'Order receipt']
-      ]
+      activity: [['Jollof and grilled chicken', 'Night Market · today', 'GH₵ 45'], ['Waakye special', 'Bush Canteen · Monday', 'GH₵ 35'], ['Banku and tilapia', 'Central Cafeteria · last week', 'GH₵ 60']]
     },
     study: {
-      key: 'study',
-      name: 'StudyLoop',
+      key: 'study', kind: 'app', name: 'StudyLoop', mark: 'L', accent: '#5b63d6',
       prompt: 'A study group planner that matches students revising the same course.',
       tagline: 'Find your people. Revise together.',
-      accent: '#5b63d6',
-      mark: 'L',
-      listTitle: 'Sessions this week',
-      summaryLabel: 'Hours revised',
-      summaryValue: '14 h',
+      home: ['Sessions', 'Groups meeting this week'], listTitle: 'Sessions this week',
+      summaryLabel: 'Hours revised', summaryValue: '14 h',
       items: [
         { t: 'Calculus II past questions', s: 'Tue 4 pm · Library L2', v: '5 going' },
         { t: 'Data Structures revision', s: 'Wed 6 pm · Lab 4', v: '8 going' },
         { t: 'Thermodynamics problem set', s: 'Fri 2 pm · Room B12', v: '3 going' }
       ],
-      detail: {
-        statLabel: 'Seats left',
-        rows: [['When', 'Tuesday, 4:00 pm'], ['Where', 'Library, Level 2'], ['Host', 'Kojo A.']],
-        cta: 'Join session'
-      },
-      done: { title: "You're in", sub: 'Calculus II past questions, Tuesday at 4:00 pm. We will remind you an hour before.' },
-      screens: [
-        ['Welcome', 'Intro and get started'],
-        ['Sessions', 'Groups meeting this week'],
-        ['Session detail', 'Time, place, join'],
-        ['Confirmation', 'Seat confirmed']
-      ]
+      detail: { name: 'Session detail', desc: 'Time, place, join', statLabel: 'Going',
+        rows: [['When', 'Tuesday, 4:00 pm'], ['Where', 'Library, Level 2'], ['Host', 'Kojo A.']], cta: 'Join session' },
+      pay: { name: 'Join', desc: 'Pick how you will take part', label: 'How will you join?', options: ['In person', 'Online', 'Just notes'], method: 'Reminder 1 hour before', cta: 'Confirm seat' },
+      done: { title: "You're in", sub: 'Calculus II past questions, Tuesday at 4:00 pm.' },
+      activity: [['Calculus II past questions', 'Joined · today', '2 h'], ['Physics lab prep', 'Attended · Friday', '1.5 h'], ['Data Structures revision', 'Hosted · last week', '3 h']]
     },
     generic: {
-      key: 'generic',
-      name: 'Your concept',
-      prompt: '',
-      tagline: 'Your idea, on a real screen.',
-      accent: '#ff7a59',
-      mark: 'C',
-      listTitle: 'Main list',
-      summaryLabel: 'Key number',
-      summaryValue: '128',
-      items: [
-        { t: 'First item', s: 'Supporting detail', v: 'Value' },
-        { t: 'Second item', s: 'Supporting detail', v: 'Value' },
-        { t: 'Third item', s: 'Supporting detail', v: 'Value' }
-      ],
-      detail: {
-        statLabel: 'Headline figure',
-        rows: [['Detail one', 'Value'], ['Detail two', 'Value'], ['Detail three', 'Value']],
-        cta: 'Main action'
-      },
+      key: 'generic', kind: 'app', name: 'Your concept', mark: 'C', accent: '#ff7a59',
+      prompt: '', tagline: 'Your idea, on a real screen.',
+      home: ['Home', 'Main list'], listTitle: 'Main list',
+      summaryLabel: 'Key number', summaryValue: '128',
+      items: [{ t: 'First item', s: 'Supporting detail', v: 'Value' }, { t: 'Second item', s: 'Supporting detail', v: 'Value' }, { t: 'Third item', s: 'Supporting detail', v: 'Value' }],
+      detail: { name: 'Detail', desc: 'One item and its action', statLabel: 'Headline figure',
+        rows: [['Detail one', 'Value'], ['Detail two', 'Value'], ['Detail three', 'Value']], cta: 'Main action' },
+      pay: { name: 'Action', desc: 'Options and confirm', label: 'Choose an option', options: ['Option A', 'Option B', 'Option C'], method: 'Secondary detail', cta: 'Confirm' },
       done: { title: 'Done', sub: 'This is where the success state for your main action goes.' },
-      screens: [
-        ['Welcome', 'Intro and get started'],
-        ['Home', 'Main list'],
-        ['Detail', 'One item and its action'],
-        ['Confirmation', 'Success state']
-      ]
+      activity: [['Recent item', 'Detail · today', 'Value'], ['Recent item', 'Detail · yesterday', 'Value'], ['Recent item', 'Detail · last week', 'Value']]
     }
   };
 
-  const ACCENTS = ['#1f8a5b', '#e2622f', '#5b63d6', '#c2255c', '#0c8599'];
+  const SITES = {
+    bakery: {
+      key: 'bakery', kind: 'site', name: 'Adjoa Bakes', mark: 'A', accent: '#b4552d', domain: 'adjoabakes.preview',
+      prompt: 'A website for my home bakery where people can see the menu and order a cake.',
+      heroTitle: 'Fresh from the oven, every morning.', heroSub: 'Small-batch bread, pastries and celebration cakes, baked to order in Accra.',
+      heroCta: 'Order a cake', listName: 'Menu',
+      points: [['Baked daily', 'Nothing sits on a shelf overnight.'], ['Made to order', 'Tell us the size, flavour and message.'], ['Pickup or delivery', 'Same-day within the city.']],
+      products: [['Butter bread', 'GH₵ 25'], ['Meat pie', 'GH₵ 12'], ['Chocolate cake', 'GH₵ 180'], ['Cinnamon rolls', 'GH₵ 40'], ['Banana loaf', 'GH₵ 35'], ['Birthday cake', 'GH₵ 250']],
+      story: ['Our story', 'It started with one oven and a family recipe for butter bread. Neighbours kept asking for more, so the kitchen grew.', 'Everything is still mixed by hand, in small batches, by the same three people.'],
+      orderTitle: 'Order a cake', fields: ['Your name', 'Phone number', 'What would you like?'], orderCta: 'Send order',
+      sent: ['Order received', 'We will call you within the hour to confirm the details.']
+    },
+    genericSite: {
+      key: 'genericSite', kind: 'site', name: 'Your site', mark: 'Y', accent: '#ff7a59', domain: 'yoursite.preview',
+      prompt: '', heroTitle: 'Your headline goes here.', heroSub: 'One or two lines that say what you offer and who it is for.',
+      heroCta: 'Main action', listName: 'Products',
+      points: [['First benefit', 'A short supporting line.'], ['Second benefit', 'A short supporting line.'], ['Third benefit', 'A short supporting line.']],
+      products: [['Item one', 'Price'], ['Item two', 'Price'], ['Item three', 'Price'], ['Item four', 'Price'], ['Item five', 'Price'], ['Item six', 'Price']],
+      story: ['About', 'A paragraph about who you are and why you started.', 'A second paragraph about how you work.'],
+      orderTitle: 'Get in touch', fields: ['Your name', 'Phone or email', 'Message'], orderCta: 'Send',
+      sent: ['Message sent', 'This is the confirmation state for your contact form.']
+    }
+  };
+
+  Object.values(APPS).forEach((d) => {
+    d.screens = [
+      { key: 'welcome', name: 'Welcome', desc: 'Intro and get started' },
+      { key: 'signin', name: 'Sign in', desc: 'Phone number and continue' },
+      { key: 'home', name: d.home[0], desc: d.home[1] },
+      { key: 'detail', name: d.detail.name, desc: d.detail.desc },
+      { key: 'pay', name: d.pay.name, desc: d.pay.desc },
+      { key: 'done', name: 'Confirmation', desc: 'Success state' },
+      { key: 'activity', name: 'Activity', desc: 'Recent history' },
+      { key: 'profile', name: 'Profile', desc: 'Account and preferences' }
+    ];
+    d.taps = ['Get started', 'Continue', 'Tap an item', d.detail.cta, d.pay.cta, 'Tab bar', 'Tab bar'];
+  });
+  Object.values(SITES).forEach((d) => {
+    d.screens = [
+      { key: 'home', name: 'Home', desc: 'Hero, benefits, featured' },
+      { key: 'menu', name: d.listName, desc: 'Everything on offer' },
+      { key: 'story', name: d.story[0], desc: 'Who is behind it' },
+      { key: 'order', name: d.orderTitle, desc: 'Short form' },
+      { key: 'sent', name: 'Confirmation', desc: 'Form sent' }
+    ];
+    d.taps = [d.listName + ' link', d.story[0] + ' link', d.heroCta, d.orderCta];
+  });
+
+  const IDEAS = Object.assign({}, APPS, SITES);
+  const ACCENTS = ['#1f8a5b', '#e2622f', '#5b63d6', '#c2255c', '#0c8599', '#b4552d'];
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const tick = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   function statusRow() {
     const d = new Date();
-    const h = d.getHours() % 12 || 12;
-    const m = String(d.getMinutes()).padStart(2, '0');
-    return `<div class="p-status"><span>${h}:${m}</span><span class="p-status-r"><i class="sig"></i><i class="bat"></i></span></div>`;
+    return `<div class="p-status"><span>${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')}</span><span class="p-status-r"><i class="sig"></i><i class="bat"></i></span></div>`;
   }
 
-  function screenHtml(idea, index) {
-    const first = idea.items[0];
-    if (index === 0) {
-      return `<div class="p-welcome">
-        <div class="p-logo"><b>${esc(idea.mark)}</b></div>
-        <h1>${esc(idea.name)}</h1>
-        <p>${esc(idea.tagline)}</p>
-        <button class="p-btn" data-go="1">Get started</button>
-        <button class="p-link" data-go="1">I already have an account</button>
-      </div>`;
-    }
-    if (index === 1) {
-      return `<div class="p-pad">
-        <div class="p-top"><div><small>Good to see you</small><h2>${esc(idea.listTitle)}</h2></div><div class="p-avatar">K</div></div>
-        <div class="p-summary"><small>${esc(idea.summaryLabel)}</small><b>${esc(idea.summaryValue)}</b></div>
-        <div class="p-list">
-          ${idea.items.map((it) => `<button class="p-item" data-go="2">
+  function tabBar(on) {
+    const tabs = [['home', 'Home'], ['activity', 'Activity'], ['profile', 'Profile']];
+    return `<div class="p-tabs">${tabs.map((t) => `<button data-go="${t[0]}"${t[0] === on ? ' class="on"' : ''}><i></i>${t[1]}</button>`).join('')}</div>`;
+  }
+
+  function appScreen(d, key) {
+    const first = d.items[0];
+    switch (key) {
+      case 'welcome': return `<div class="p-center">
+          <div class="p-logo"><b>${esc(d.mark)}</b></div>
+          <h1>${esc(d.name)}</h1><p>${esc(d.tagline)}</p>
+          <button class="p-btn" data-go="signin">Get started</button>
+          <button class="p-link" data-go="signin">I already have an account</button>
+        </div>`;
+      case 'signin': return `<div class="p-pad">
+          <button class="p-back" data-go="welcome">‹ Back</button>
+          <div class="p-head"><h2>Welcome back</h2><small>Enter your phone number to continue.</small></div>
+          <div class="p-field"><small>Phone number</small><b>024 000 0000</b></div>
+          <div class="p-field"><small>One-time code</small><b>• • • •</b></div>
+          <span class="p-grow"></span>
+          <button class="p-btn" data-go="home">Continue</button>
+        </div>`;
+      case 'home': return `<div class="p-pad">
+          <div class="p-top"><div><small>Good to see you</small><h2>${esc(d.listTitle)}</h2></div><button class="p-avatar" data-go="profile">K</button></div>
+          <div class="p-summary"><small>${esc(d.summaryLabel)}</small><b>${esc(d.summaryValue)}</b></div>
+          <div class="p-list">${d.items.map((it) => `<button class="p-item" data-go="detail">
             <span class="p-dot"></span>
             <span class="p-item-text"><b>${esc(it.t)}</b><small>${esc(it.s)}</small></span>
-            <span class="p-item-val">${esc(it.v)}</span>
-          </button>`).join('')}
-        </div>
-      </div>
-      <div class="p-tabs"><span class="on"></span><span></span><span></span><span></span></div>`;
+            <span class="p-item-val">${esc(it.v)}</span></button>`).join('')}</div>
+        </div>${tabBar('home')}`;
+      case 'detail': return `<div class="p-pad">
+          <button class="p-back" data-go="home">‹ Back</button>
+          <div class="p-hero"><small>${esc(d.detail.statLabel)}</small><b>${esc(first.v)}</b><span>${esc(first.t)}</span></div>
+          <div class="p-rows">${d.detail.rows.map((r) => `<div><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join('')}</div>
+          <span class="p-grow"></span>
+          <button class="p-btn" data-go="pay">${esc(d.detail.cta)}</button>
+        </div>`;
+      case 'pay': return `<div class="p-pad">
+          <button class="p-back" data-go="detail">‹ Back</button>
+          <div class="p-head"><h2>${esc(d.pay.name)}</h2><small>${esc(d.pay.label)}</small></div>
+          <div class="p-options">${d.pay.options.map((o, i) => `<button data-pick${i === 1 ? ' class="on"' : ''}>${esc(o)}</button>`).join('')}</div>
+          <div class="p-rows"><div><span>${esc(first.t)}</span><b>${esc(first.v)}</b></div><div><span>Method</span><b>${esc(d.pay.method)}</b></div></div>
+          <span class="p-grow"></span>
+          <button class="p-btn" data-go="done">${esc(d.pay.cta)}</button>
+        </div>`;
+      case 'done': return `<div class="p-center">
+          <div class="p-check">${tick}</div>
+          <h1>${esc(d.done.title)}</h1><p>${esc(d.done.sub)}</p>
+          <button class="p-btn" data-go="home">Back to home</button>
+          <button class="p-link" data-go="activity">See activity</button>
+        </div>`;
+      case 'activity': return `<div class="p-pad">
+          <div class="p-head"><h2>Activity</h2><small>Your recent history</small></div>
+          <div class="p-rows">${d.activity.map((a) => `<div class="tall"><span><b>${esc(a[0])}</b><small>${esc(a[1])}</small></span><b>${esc(a[2])}</b></div>`).join('')}</div>
+        </div>${tabBar('activity')}`;
+      default: return `<div class="p-pad">
+          <div class="p-profile"><div class="p-avatar big">K</div><h2>Kwame</h2><small>Member since 2026</small></div>
+          <div class="p-rows">${['Notifications', 'Payment methods', 'Privacy', 'Help'].map((r) => `<div><span>${r}</span><b>›</b></div>`).join('')}</div>
+          <span class="p-grow"></span>
+          <button class="p-link" data-go="welcome">Sign out</button>
+        </div>${tabBar('profile')}`;
     }
-    if (index === 2) {
-      return `<div class="p-pad">
-        <button class="p-back" data-go="1">‹ Back</button>
-        <div class="p-hero"><small>${esc(idea.detail.statLabel)}</small><b>${esc(first.v)}</b><span>${esc(first.t)}</span></div>
-        <div class="p-rows">
-          ${idea.detail.rows.map((r) => `<div><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join('')}
-        </div>
-        <button class="p-btn" data-go="3">${esc(idea.detail.cta)}</button>
-      </div>`;
+  }
+
+  function siteScreen(d, key) {
+    const nav = `<nav class="s-nav"><button class="s-brand" data-go="home"><i>${esc(d.mark)}</i>${esc(d.name)}</button>
+      <span class="s-links"><button data-go="menu"${key === 'menu' ? ' class="on"' : ''}>${esc(d.listName)}</button><button data-go="story"${key === 'story' ? ' class="on"' : ''}>${esc(d.story[0])}</button><button class="s-cta" data-go="order">${esc(d.heroCta)}</button></span></nav>`;
+    const foot = `<footer class="s-foot"><b>${esc(d.name)}</b><span>Made with Selasi AI. Concept preview.</span></footer>`;
+    const card = (p) => `<button class="s-card" data-go="order"><i></i><b>${esc(p[0])}</b><small>${esc(p[1])}</small></button>`;
+    let body;
+    if (key === 'home') {
+      body = `<section class="s-hero"><div><h1>${esc(d.heroTitle)}</h1><p>${esc(d.heroSub)}</p>
+          <div class="s-row"><button class="p-btn" data-go="order">${esc(d.heroCta)}</button><button class="s-ghost" data-go="menu">See the ${esc(d.listName.toLowerCase())}</button></div></div><i class="s-art"></i></section>
+        <section class="s-points">${d.points.map((p) => `<div><b>${esc(p[0])}</b><small>${esc(p[1])}</small></div>`).join('')}</section>
+        <section class="s-sec"><h2>Popular this week</h2><div class="s-grid">${d.products.slice(0, 3).map(card).join('')}</div></section>`;
+    } else if (key === 'menu') {
+      body = `<section class="s-sec"><h1>${esc(d.listName)}</h1><p class="s-lead">Tap anything to order it.</p><div class="s-grid">${d.products.map(card).join('')}</div></section>`;
+    } else if (key === 'story') {
+      body = `<section class="s-sec narrow"><h1>${esc(d.story[0])}</h1><i class="s-art wide"></i><p>${esc(d.story[1])}</p><p>${esc(d.story[2])}</p><button class="p-btn" data-go="order">${esc(d.heroCta)}</button></section>`;
+    } else if (key === 'order') {
+      body = `<section class="s-sec narrow"><h1>${esc(d.orderTitle)}</h1><p class="s-lead">It takes less than a minute.</p>
+        ${d.fields.map((f, i) => `<div class="p-field${i === 2 ? ' area' : ''}"><small>${esc(f)}</small><b>&nbsp;</b></div>`).join('')}
+        <button class="p-btn" data-go="sent">${esc(d.orderCta)}</button></section>`;
+    } else {
+      body = `<section class="s-sec narrow s-sent"><div class="p-check">${tick}</div><h1>${esc(d.sent[0])}</h1><p>${esc(d.sent[1])}</p><button class="p-btn" data-go="home">Back to home</button></section>`;
     }
-    return `<div class="p-done">
-      <div class="p-check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <h1>${esc(idea.done.title)}</h1>
-      <p>${esc(idea.done.sub)}</p>
-      <button class="p-btn" data-go="1">Back to home</button>
+    return nav + `<div class="s-body">${body}</div>` + foot;
+  }
+
+  function chrome(d) {
+    return `<div class="p-chrome">
+      <span class="pc-lights"><i></i><i></i><i></i></span>
+      <button data-nav="back" aria-label="Back">‹</button><button data-nav="fwd" aria-label="Forward">›</button>
+      <span class="pc-url"><i class="pc-lock"></i>${esc(d.domain)}</span>
+      <span class="pc-tabs">1</span>
     </div>`;
   }
 
-  /* mount(host, idea, opts) → controller { go(i), setDark(b), setAccent(c), index } */
+  /* mount(host, idea, opts) → controller */
   function mount(host, idea, opts) {
     const o = opts || {};
-    let index = 0;
-    host.innerHTML = `<div class="proto" style="--p-accent:${idea.accent}">${statusRow()}<div class="p-view"></div><div class="p-home"></div></div>`;
+    const site = idea.kind === 'site';
+    const keys = idea.screens.map((s) => s.key);
+    let index = 0, hist = [0], pos = 0;
+    host.innerHTML = `<div class="proto ${site ? 'site' : 'app'}" style="--p-accent:${idea.accent}">${statusRow()}${site ? chrome(idea) : ''}<div class="p-view"></div><div class="p-home"></div></div>`;
     const root = host.firstElementChild;
     const view = root.querySelector('.p-view');
 
-    function go(i, silent) {
-      index = Math.max(0, Math.min(3, i));
+    function paint(silent) {
       view.classList.remove('p-in');
-      view.innerHTML = screenHtml(idea, index);
+      view.innerHTML = site ? siteScreen(idea, keys[index]) : appScreen(idea, keys[index]);
+      view.scrollTop = 0;
       void view.offsetWidth;
       view.classList.add('p-in');
+      if (site) {
+        root.querySelector('[data-nav="back"]').disabled = pos === 0;
+        root.querySelector('[data-nav="fwd"]').disabled = pos >= hist.length - 1;
+      }
       if (!silent && typeof o.onNavigate === 'function') o.onNavigate(index);
     }
-
+    function go(target, silent) {
+      const i = typeof target === 'number' ? target : keys.indexOf(target);
+      if (i < 0 || i >= keys.length) return;
+      if (i !== index) { hist = hist.slice(0, pos + 1); hist.push(i); pos = hist.length - 1; }
+      index = i;
+      paint(silent);
+    }
     root.addEventListener('click', (e) => {
+      const nav = e.target.closest('[data-nav]');
+      if (nav) {
+        const next = pos + (nav.dataset.nav === 'back' ? -1 : 1);
+        if (next >= 0 && next < hist.length) { pos = next; index = hist[pos]; paint(); }
+        return;
+      }
+      const pick = e.target.closest('[data-pick]');
+      if (pick) { pick.parentNode.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b === pick)); return; }
       const t = e.target.closest('[data-go]');
-      if (t) go(Number(t.dataset.go));
+      if (t) go(t.dataset.go);
     });
 
-    go(0, true);
+    paint(true);
     return {
       go: go,
       setDark: (b) => root.classList.toggle('p-dark', !!b),
       setAccent: (c) => root.style.setProperty('--p-accent', c),
+      setWide: (b) => root.classList.toggle('p-wide', !!b),
       get index() { return index; }
     };
   }

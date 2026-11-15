@@ -14,10 +14,10 @@ python3 -m http.server 8080
 
 ## What is here
 
-- `index.html`: the page (top bar, chat, device stage, flow rail, handoff dialog)
+- `index.html`: the page (nav rail and drawer, chat, device stage, flow, settings, handoff dialog)
 - `assets/css/app.css`: theme tokens (dark and light) and layout
-- `assets/js/app.js`: chat flow, device stage, captures, handoff
-- `assets/js/prototype.js`: the three sample prototypes shown inside the device
+- `assets/js/app.js`: chats and projects, device stage, stamina, settings, captures, handoff
+- `assets/js/prototype.js`: the sample prototypes (apps fill the screen, sites open in browser chrome)
 - `assets/js/device-lockscreens.js`, `assets/css/device-lockscreens.css`,
   `assets/fonts/`: the device frames and lock screens from Selasi Coder
 
