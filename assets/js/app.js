@@ -33,6 +33,7 @@
     git: '<circle cx="6" cy="6" r="2.500"/><circle cx="6" cy="18" r="2.500"/><circle cx="18" cy="8" r="2.500"/><path d="M6 8.500v7M18 10.500c0 4-6 3-10.500 5.500"/>',
     file: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>',
     check: '<path d="M5 12.500l4.500 4.500L19 7.500"/>',
+    expand: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
     arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
   };
   function icon(name) {
@@ -153,6 +154,7 @@
     $('caption').textContent = `${DEVICE_LABEL[state.device]} · ${live ? state.idea.name : 'Lock screen'}`;
     const relock = $('relockBtn');
     relock.hidden = !state.rendered;
+    $('fullBtn').hidden = !state.rendered;
     relock.innerHTML = `<span>${icon(state.locked ? 'unlock' : 'lock')}</span>${state.locked ? 'Unlock' : 'Lock'}`;
     document.querySelectorAll('#flowList .flow-item').forEach((el, i) => el.classList.toggle('active', live && i === idx));
   }
@@ -188,6 +190,13 @@
     state.proto.go(Number(b.dataset.screen));
   });
 
+  /* ── Small-screen helpers ──────────────────────────────────────────── */
+  const small = window.matchMedia('(max-width: 900px)');
+  const onDeviceView = () => small.matches && document.body.dataset.view === 'device';
+  function markUnread() {
+    if (onDeviceView()) document.querySelector('.view-switch [data-view="chat"]').classList.add('has-new');
+  }
+
   /* ── Chat primitives ───────────────────────────────────────────────── */
   const messages = $('messages'), scroller = $('chatScroll');
   const toBottom = () => { scroller.scrollTop = scroller.scrollHeight; };
@@ -218,17 +227,22 @@
     typing.classList.add('pop');
     paintIcons(typing);
     toBottom();
+    if (onDeviceView()) { markUnread(); toast(typing.textContent.replace(/\s+/g, ' ').trim().slice(0, 110)); }
     return typing;
   }
 
   function setChips(list) {
-    $('chips').innerHTML = (list || []).map((c) => `<button data-say="${esc(c)}">${esc(c)}</button>`).join('');
+    const html = (list || []).map((c) => `<button data-say="${esc(c)}">${esc(c)}</button>`).join('');
+    $('chips').innerHTML = html;
+    $('stageChips').innerHTML = state.rendered ? html : '';
     toBottom();
   }
-  $('chips').addEventListener('click', (e) => {
+  function onChip(e) {
     const b = e.target.closest('button[data-say]');
     if (b) handleUser(b.dataset.say);
-  });
+  }
+  $('chips').addEventListener('click', onChip);
+  $('stageChips').addEventListener('click', onChip);
 
   /* ── Scripted replies ──────────────────────────────────────────────── */
   function pickIdea(text) {
@@ -242,7 +256,7 @@
   async function replyPlan() {
     const idea = state.idea;
     $('projectName').textContent = idea.name;
-    $('input').placeholder = 'Ask for a change, or say "render it"…';
+    $('input').placeholder = 'Ask for a change…';
     const lead = idea.key === 'generic'
       ? 'I can sketch this as a four-screen flow. This concept build only has three sample ideas wired in, so the screens use placeholder content.'
       : `<b>${esc(idea.name)}</b> works well as a short four-screen flow. This is the shape I would start with:`;
@@ -273,9 +287,10 @@
     state.proto = Proto.mount(devScreen, idea, { onNavigate: syncStage });
     state.proto.setDark(state.dark);
     state.rendered = true;
+    $('renderNow').innerHTML = `<span>${icon('phone')}</span>View on device`;
     paintFlow();
     addUsage(0.05);
-    if (window.matchMedia('(max-width: 900px)').matches) setView('device');
+    if (small.matches) setView('device');
     await unlock();
     await say(`${idea.screens.length} screens are live on the ${esc(DEVICE_LABEL[state.device])}. Tap <b>Get started</b> on the device to walk the flow, or jump to any screen from the Flow list.`);
     setChips(['Make it dark', 'Change the accent', 'Find references', 'Hand off to Coder']);
@@ -438,7 +453,11 @@ ${idea.screens.map((s, i) => `- screens/0${i + 1}-${slug(s[0])}.html`).join('\n'
     const b = e.target.closest('button[data-idea]');
     if (b) handleUser(Proto.IDEAS[b.dataset.idea].prompt);
   });
-  $('renderNow').addEventListener('click', () => handleUser('Render it on the device'));
+  $('renderNow').addEventListener('click', () => {
+    if (!state.rendered) return handleUser('Render it on the device');
+    if (small.matches) setView('device');
+    unlock();
+  });
   $('searchToggle').addEventListener('click', () => {
     state.search = !state.search;
     $('searchToggle').setAttribute('aria-pressed', String(state.search));
@@ -476,11 +495,45 @@ ${idea.screens.map((s, i) => `- screens/0${i + 1}-${slug(s[0])}.html`).join('\n'
   function setView(v) {
     document.body.dataset.view = v;
     document.querySelectorAll('.view-switch button').forEach((b) => b.classList.toggle('active', b.dataset.view === v));
+    if (v === 'chat') {
+      document.querySelector('.view-switch [data-view="chat"]').classList.remove('has-new');
+      toBottom();
+    }
   }
   document.querySelector('.view-switch').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-view]');
     if (b) setView(b.dataset.view);
   });
+
+  /* ── Full-screen test: the prototype fills the visitor's own screen ── */
+  const immersive = $('immersive'), immScreen = $('immScreen');
+  async function enterImmersive() {
+    if (needsRender()) return;
+    await unlock();
+    const node = devScreen.firstElementChild;
+    if (!node) return;
+    immScreen.appendChild(node);
+    immersive.hidden = false;
+  }
+  function exitImmersive() {
+    if (immersive.hidden) return;
+    const node = immScreen.firstElementChild;
+    if (node) devScreen.appendChild(node);
+    immersive.hidden = true;
+  }
+  /* On small screens the stage tools join the capture dock, so the device
+     gets the height the header row would have used. */
+  function placeTools() {
+    const home = small.matches ? document.querySelector('.capture-dock') : document.querySelector('.stage-tools');
+    home.appendChild($('fullBtn'));
+    home.appendChild($('relockBtn'));
+  }
+  placeTools();
+  small.addEventListener('change', placeTools);
+  $('fullBtn').addEventListener('click', enterImmersive);
+  $('immExit').addEventListener('click', exitImmersive);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') exitImmersive(); });
+  small.addEventListener('change', (e) => { if (!e.matches) exitImmersive(); });
 
   /* ── Boot ──────────────────────────────────────────────────────────── */
   paintIcons();

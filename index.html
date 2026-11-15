@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#363d4a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Selasi AI">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/favicon.svg">
   <title>Selasi AI</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/css/device-lockscreens.css">
@@ -28,9 +34,9 @@
     </div>
 
     <nav class="device-tabs" id="deviceTabs" aria-label="Device">
-      <button data-device="iphone" class="active">iPhone 15 Pro</button>
-      <button data-device="android">Samsung S26 Ultra</button>
-      <button data-device="tablet">iPad Pro 11"</button>
+      <button data-device="iphone" class="active"><span class="long">iPhone 15 Pro</span><span class="short">iPhone</span></button>
+      <button data-device="android"><span class="long">Samsung S26 Ultra</span><span class="short">Samsung</span></button>
+      <button data-device="tablet"><span class="long">iPad Pro 11"</span><span class="short">iPad</span></button>
     </nav>
 
     <div class="top-actions">
@@ -92,7 +98,10 @@
     <section class="stage" aria-label="Device preview">
       <div class="stage-head">
         <span class="state-pill" id="statePill"><i></i><span>Lock screen</span></span>
-        <button class="mini-btn" id="relockBtn" hidden><span data-icon="lock"></span>Lock</button>
+        <div class="stage-tools">
+          <button class="mini-btn only-small" id="fullBtn" hidden><span data-icon="expand"></span>Full screen</button>
+          <button class="mini-btn" id="relockBtn" hidden><span data-icon="lock"></span>Lock</button>
+        </div>
       </div>
 
       <div class="stage-body">
@@ -106,6 +115,7 @@
       </div>
 
       <div class="stage-foot">
+        <div class="chips stage-chips" id="stageChips"></div>
         <div class="capture-dock" role="toolbar" aria-label="Capture">
           <button id="shotBtn"><span data-icon="camera"></span>Screenshot<em>1K</em></button>
           <button id="gifBtn"><span data-icon="film"></span>Flow GIF<em>Free</em></button>
@@ -149,6 +159,11 @@
         <button class="handoff-btn" data-toast="Handoff package prepared. Opening Selasi Coder is not wired up yet."><span data-icon="send"></span>Open in Selasi Coder</button>
       </div>
     </div>
+  </div>
+
+  <div class="immersive" id="immersive" hidden>
+    <div class="imm-screen" id="immScreen"></div>
+    <button class="imm-exit" id="immExit"><span data-icon="x"></span>Exit test</button>
   </div>
 
   <div class="toast" id="toast" role="status"></div>
