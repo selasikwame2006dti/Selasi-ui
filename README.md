@@ -21,6 +21,12 @@ python3 -m http.server 8080
 - `assets/js/device-lockscreens.js`, `assets/css/device-lockscreens.css`,
   `assets/fonts/`: the device frames and lock screens from Selasi Coder
 
+## Photos
+
+The sample prototypes have photo slots. Add an image to `assets/img/` and map
+its slot name to the file in `assets/img/photos.js` (the slot names are listed
+there). Slots without a photo show a drawn tile with an icon.
+
 This is a concept build with no backend. Chat replies are scripted, and
 captures, download, GitHub push and the Coder handoff show what will happen
 without doing it.

@@ -45,6 +45,9 @@
     file: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>',
     ticket: '<path d="M4 8a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v3a1.5 1.5 0 0 0 0 3v3a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2v-3a1.5 1.5 0 0 0 0-3z"/><path d="M14 7v10" stroke-dasharray="2 2.5"/>',
     pulse: '<path d="M3 12h4l2.5-6 4 12 2.5-6h5"/>',
+    cake: '<path d="M5 20v-7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7M3 20h18M5 15.5c2.3 1.5 4.700-1.500 7 0s4.700 1.500 7 0M12 11V7M12 4.500v.010"/>',
+    palette: '<path d="M12 3.500a8.500 8.500 0 1 0 0 17c1.500 0 2-1 2-2 0-1.500 1-2 2.500-2H18a2.500 2.500 0 0 0 2.500-2.500c0-4.700-3.800-8.500-8.500-8.500z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="8" r="1"/><circle cx="16" cy="11" r="1"/>',
+    scissors: '<circle cx="6.500" cy="7" r="2.500"/><circle cx="6.500" cy="17" r="2.500"/><path d="M8.700 8.300L20 18M8.700 15.700L20 6"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/>'
   };
   const icon = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -83,7 +86,7 @@
   /* ── State ─────────────────────────────────────────────────────────── */
   const DEVICE_LABEL = { iphone: 'iPhone 15 Pro', android: 'Samsung S26 Ultra', tablet: 'iPad Pro 11"', laptop: 'Laptop' };
   let seq = 0;
-  const blankChat = () => ({ id: ++seq, idea: null, rendered: false, dark: false, accentIdx: 0, accentColor: null, html: '', chips: [], screen: 0 });
+  const blankChat = () => ({ id: ++seq, idea: null, rendered: false, dark: false, variant: 0, accentIdx: 0, accentColor: null, html: '', chips: [], screen: 0 });
   let chat = blankChat();
   let chats = [chat];
   const ui = { device: settings.device, locked: true, busy: false, usage: 0, proto: null, search: settings.search };
@@ -242,7 +245,7 @@
     document.body.classList.toggle('has-proto', chat.rendered);
     $$('.js-title').forEach((el) => { el.textContent = idea ? idea.name : (el.classList.contains('appbar-title') ? 'Selasi AI' : 'New idea'); });
     $$('.js-handoff').forEach((el) => { el.hidden = !chat.rendered; });
-    $('renderNow').hidden = !(idea && !chat.rendered);
+    $('renderNow').hidden = ui.busy || !(idea && !chat.rendered);
     $('dockHandle').hidden = !chat.rendered;
     $('askBtn').hidden = !chat.rendered;
     if (!chat.rendered) closeAsk();
@@ -349,7 +352,7 @@
     return I.generic;
   }
   const noun = () => (chat.idea.kind === 'site' ? 'pages' : 'screens');
-  const afterRender = () => [chat.dark ? 'Make it light' : 'Make it dark', 'Change the accent', 'Find references', 'Hand off to Coder'];
+  const afterRender = () => ['Show another version', chat.dark ? 'Make it light' : 'Make it dark', 'Change the accent', 'Hand off to Coder'];
 
   async function replyPlan() {
     const idea = chat.idea, n = idea.screens.length;
@@ -382,13 +385,15 @@
     await unlock();
     await say(idea.kind === 'site'
       ? `${esc(idea.name)} is open in the browser on the ${esc(DEVICE_LABEL[ui.device])}. Use the links on the page and the back button to move around. Try the Laptop tab for the wide layout.`
-      : `${idea.screens.length} screens are live on the ${esc(DEVICE_LABEL[ui.device])}. Tap <b>Get started</b> on the device to walk the flow.`);
+      : `${idea.screens.length} screens are live on the ${esc(DEVICE_LABEL[ui.device])}. Tap <b>Get started</b> on the device. The controls work, so try the buttons, steppers and filters.`);
     setChips(afterRender());
   }
 
   function mountProto() {
+    if (ui.proto) ui.proto.destroy();
     ui.proto = Proto.mount(devScreen, chat.idea, { onNavigate: (i) => { chat.screen = i; syncStage(); } });
     ui.proto.setDark(chat.dark);
+    ui.proto.setVariant(chat.variant);
     if (chat.accentColor) ui.proto.setAccent(chat.accentColor);
     ui.proto.setWide(ui.device === 'tablet' || ui.device === 'laptop');
     if (chat.screen) ui.proto.go(chat.screen, true);
@@ -399,6 +404,13 @@
     ui.proto.setDark(wantDark);
     await unlock();
     await say(`Restyled everything with a ${wantDark ? 'dark' : 'light'} surface. The layout and flow are unchanged.`);
+    setChips(afterRender());
+  }
+  async function restyleVariant() {
+    chat.variant = (chat.variant + 1) % Proto.VARIANTS.length;
+    ui.proto.setVariant(chat.variant);
+    await unlock();
+    await say(`Here is the <b>${Proto.VARIANTS[chat.variant]}</b> version: same flow and content, different shapes, type and density. Ask again for the next one.`);
     setChips(afterRender());
   }
   async function restyleAccent() {
@@ -441,6 +453,9 @@
         else { await say('Here is the package Coder will receive. Review the plan and the handoff record before you send it.'); setChips(afterRender()); closeAsk(); openHandoff(); }
       } else if (/search|reference|research|source|look up/.test(t) || (ui.search && !/render|dark|light|accent|colou?r/.test(t))) {
         await search();
+      } else if (/version|variation|another look|different look|redesign/.test(t)) {
+        if (!chat.rendered) { await say('Let me put it on the device first, then show you other versions.'); await render(); }
+        await restyleVariant();
       } else if (/dark|light|accent|colou?r|palette/.test(t)) {
         if (!chat.rendered) { await say('Let me put it on the device first, then restyle it.'); await render(); }
         if (/dark|light/.test(t)) await restyleDark(/dark/.test(t)); else await restyleAccent();
@@ -449,13 +464,14 @@
         else await render();
       } else {
         await say(chat.rendered
-          ? 'Noted. In this concept build I can restyle the surface, change the accent, show how cited search will look, or prepare the handoff to Coder.'
+          ? 'Noted. In this concept build I can show another version, restyle the surface, change the accent, show how cited search will look, or prepare the handoff to Coder.'
           : 'Noted, I have added that to the plan. Ask me to render it when you want to see it on the device.');
         setChips(chat.rendered ? afterRender() : ['Render it on the device', 'Find references first']);
       }
     } finally {
       ui.busy = false;
       document.body.classList.remove('busy');
+      syncContext();
       chat.html = messages.innerHTML;
     }
   }
@@ -485,6 +501,7 @@
     chat = c;
     messages.innerHTML = c.html;
     $('welcome').hidden = !!c.html;
+    if (ui.proto) ui.proto.destroy();
     devScreen.innerHTML = '';
     ui.proto = null;
     ui.locked = !c.rendered;
