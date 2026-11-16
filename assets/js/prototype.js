@@ -58,15 +58,23 @@
   };
   const ic = (n, cls) => `<svg class="p-ic${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n] || ''}</svg>`;
   /* A photo slot: shows the photo when one is registered, a drawn tile otherwise. */
+  const ART = window.SelasiArt || {};
   const ph = (key, icon, cls) => PHOTOS[key]
     ? `<i class="ph has-photo ${cls || ''}" style="background-image:url('assets/img/${PHOTOS[key]}')"></i>`
-    : `<i class="ph ${cls || ''}">${ic(icon)}</i>`;
+    : ART[key] ? `<i class="ph has-art ${cls || ''}">${ART[key]}</i>`
+      : `<i class="ph ${cls || ''}">${ic(icon)}</i>`;
   const tick = ic('check');
 
   /* ── Shared app screens ────────────────────────────────────────────── */
   const tabBar = (on, tabs) => `<div class="p-tabs">${tabs.map((t) => `<button data-go="${t[0]}"${t[0] === on ? ' class="on"' : ''}>${ic(t[2])}${t[1]}</button>`).join('')}</div>`;
   const back = (to) => `<button class="p-back" data-go="${to}">${ic('left')}Back</button>`;
   const stepper = (name, val) => `<div class="p-step"><button data-act="dec:${name}" aria-label="Less">${ic('minus')}</button><b>${esc(val)}</b><button data-act="inc:${name}" aria-label="More">${ic('plus')}</button></div>`;
+
+  const on = (st, k) => !!(st.t && st.t[k]);
+  const sw = (st, k, label, note) => `<button class="p-toggle${on(st, k) ? ' on' : ''}" data-act="tg:${k}"><span><b>${label}</b>${note ? `<small>${note}</small>` : ''}</span><i></i></button>`;
+  const chipset = (st, pre, list) => `<div class="p-chips static">${list.map((c) => `<button data-act="tg:${pre}-${c}"${on(st, pre + '-' + c) ? ' class="on"' : ''}>${c}</button>`).join('')}</div>`;
+  const shell = (tabs, inner) => `<div class="p-pad">${inner}<span class="p-grow"></span><button class="p-link" data-go="welcome">Sign out</button></div>${tabBar('profile', tabs)}`;
+  const h3 = (t) => `<div class="p-head"><h3>${t}</h3></div>`;
 
   function welcome(d) {
     return `<div class="p-center">
@@ -113,10 +121,10 @@
     prompt: 'A savings circle app where friends pool money every week and take turns receiving the pot.',
     tagline: 'Save together. Reach it sooner.',
     screens: appScreens({ key: 'home', name: 'Circles', desc: 'Balance, chart and circles' },
-      [{ key: 'detail', name: 'Circle detail', desc: 'Pot progress and turn order' }, { key: 'pay', name: 'Contribute', desc: 'Amount stepper and confirm' }]),
-    taps: ['Get started', 'Continue', 'Tap a circle', 'Contribute', 'Confirm', 'Tab bar', 'Tab bar'],
-    init: () => ({ amt: 50 }),
-    act(st, a, arg) { if (a === 'inc') st.amt = Math.min(500, st.amt + 10); if (a === 'dec') st.amt = Math.max(10, st.amt - 10); if (a === 'set') st.amt = Number(arg); },
+      [{ key: 'detail', name: 'Circle detail', desc: 'Pot progress and turn order' }, { key: 'pay', name: 'Contribute', desc: 'Amount stepper and confirm' }]).concat([{ key: 'invite', name: 'Invite', desc: 'Add friends to a circle' }]),
+    taps: ['Get started', 'Continue', 'Tap a circle', 'Contribute', 'Confirm', 'Tab bar', 'Tab bar', 'Invite a friend'],
+    init: () => ({ amt: 50, inv: {}, t: { auto: true, remind: true } }),
+    act(st, a, arg) { if (a === 'inc') st.amt = Math.min(500, st.amt + 10); if (a === 'dec') st.amt = Math.max(10, st.amt - 10); if (a === 'set') st.amt = Number(arg); if (a === 'inv') st.inv[arg] = !st.inv[arg]; if (a === 'copy') st.copied = true; },
     circles: [['Makola Traders', '8 members · weekly', 2400, 6, 8], ['Hall 7 Roommates', '5 members · monthly', 1250, 3, 5], ['Family Fund', '6 members · monthly', 2500, 6, 6]],
     render(key, st) {
       const d = this;
@@ -124,6 +132,8 @@
           <div class="p-top"><div><small>Good to see you</small><h2>Your circles</h2></div><button class="p-avatar" data-go="profile">K</button></div>
           <div class="p-summary"><small>Saved this year</small><b>${money(6150)}</b>
             <div class="p-bars">${[38, 52, 44, 70, 62, 88].map((h, i) => `<i style="height:${h}%"${i === 5 ? ' class="on"' : ''}></i>`).join('')}</div></div>
+          <div class="p-quick">${[['pay', 'plus', 'Contribute'], ['invite', 'users', 'Invite'], ['activity', 'list', 'History']].map((q) => `<button data-go="${q[0]}"><i>${ic(q[1])}</i>${q[2]}</button>`).join('')}</div>
+          <div class="p-note">${ic('cal')}<span><b>Next payout: Friday</b><small>Ama receives ${money(2400)} from Makola Traders</small></span></div>
           <div class="p-list">${d.circles.map((c) => `<button class="p-item col" data-go="detail">
             <span class="p-item-row"><span class="p-dot">${ic('users')}</span><span class="p-item-text"><b>${c[0]}</b><small>${c[1]}</small></span><span class="p-item-val">${money(c[2])}</span></span>
             <span class="p-prog"><i style="width:${Math.round(c[3] / c[4] * 100)}%"></i></span><small class="p-cap">${c[3]} of ${c[4]} paid in this round</small></button>`).join('')}</div>
@@ -142,6 +152,15 @@
       if (key === 'done') return doneScreen('Contribution sent', `${money(st.amt)} added to Makola Traders. Ama receives the pot on Friday.`);
       if (key === 'activity') return `<div class="p-pad"><div class="p-head"><h2>Activity</h2><small>Your recent history</small></div>
           <div class="p-rows">${[['Contribution', 'Makola Traders · today', '− ' + money(st.amt)], ['Payout received', 'Family Fund · 2 Nov', '+ ' + money(2500)], ['Contribution', 'Hall 7 Roommates · 1 Nov', '− ' + money(250)]].map((a) => `<div class="tall"><span><b>${a[0]}</b><small>${a[1]}</small></span><b>${a[2]}</b></div>`).join('')}</div></div>${tabBar('activity', TABS)}`;
+      if (key === 'invite') { const n = Object.values(st.inv).filter(Boolean).length; return `<div class="p-pad">${back('home')}
+          <div class="p-head"><h2>Invite friends</h2><small>${n ? n + ' invited to Makola Traders' : 'Add people you trust to Makola Traders'}</small></div>
+          <div class="p-rows">${['Abena Osei', 'Kofi Boateng', 'Nana Yaa', 'Selorm Dzah'].map((x) => `<div class="tall"><span class="with-ic"><i class="p-face">${x[0]}</i><b>${x}</b></span><button class="p-pill${st.inv[x] ? ' on' : ''}" data-act="inv:${x}">${st.inv[x] ? 'Invited' : 'Invite'}</button></div>`).join('')}</div>
+          <div class="p-note">${ic('send')}<span><b>Share a link</b><small>susucircle.app/join/makola</small></span><button class="p-pill${st.copied ? ' on' : ''}" data-act="copy">${st.copied ? 'Copied' : 'Copy'}</button></div></div>`; }
+      if (key === 'profile') return shell(TABS, `<div class="p-idrow"><div class="p-avatar big">K</div><div><h2>Kwame Asante</h2><span class="p-badge">${ic('shield')}Verified member</span></div></div>
+          <div class="p-trust"><div class="p-ring" style="--pct:92"><b>92</b></div><span><b>Trust score</b><small>Paid on time in 11 of 12 rounds. Circles see this before they accept you.</small></span></div>
+          <div class="p-stats">${[['3', 'circles'], [money(6150), 'saved'], ['2', 'payouts']].map((x) => `<div><b>${x[0]}</b><small>${x[1]}</small></div>`).join('')}</div>
+          <div class="p-rows"><div><span class="with-ic">${ic('wallet')}Payout account</span><b>Mobile money</b></div><button class="p-rowbtn" data-go="invite"><span class="with-ic">${ic('users')}Invite a friend</span>${ic('right', 'dim')}</button></div>
+          <div class="p-rows">${sw(st, 'auto', 'Auto-contribute', 'Pay in on payday without asking')}${sw(st, 'remind', 'Reminders', 'A nudge the day before')}</div>`);
       return null;
     }
   };
@@ -162,9 +181,10 @@
     tagline: 'Order ahead. Skip the queue.',
     screens: appScreens({ key: 'home', name: 'Menu', desc: 'Filter and photo grid' },
       [{ key: 'detail', name: 'Meal detail', desc: 'Photo, quantity, add to cart' }, { key: 'cart', name: 'Cart', desc: 'Items, totals, pickup time' }],
-      { key: 'activity', name: 'Orders', desc: 'Past orders' }),
-    taps: ['Get started', 'Continue', 'Tap a meal', 'Add to cart', 'Place order', 'Tab bar', 'Tab bar'],
-    init: () => ({ cat: 'All', cart: {}, sel: 'jollof', qty: 1, slot: '12:30' }),
+      { key: 'activity', name: 'Orders', desc: 'Past orders' }).concat([{ key: 'track', name: 'Order tracking', desc: 'Live status that advances' }]),
+    taps: ['Get started', 'Continue', 'Tap a meal', 'Add to cart', 'Place order', 'Tab bar', 'Tab bar', 'Track order'],
+    init: () => ({ cat: 'All', cart: {}, sel: 'jollof', qty: 1, slot: '12:30', step: 0, wallet: 84, t: { ready: true, 'diet-Extra pepper': true } }),
+    tick(st, key) { if (key !== 'track' || st.step >= 2) return false; st.tk = (st.tk || 0) + 1; if (st.tk % 3) return false; st.step += 1; return 'paint'; },
     act(st, a, arg, api) {
       if (a === 'cat') st.cat = arg;
       if (a === 'open') { st.sel = arg; st.qty = 1; api.go('detail'); }
@@ -175,7 +195,8 @@
       if (a === 'inc' && st.cart[arg]) st.cart[arg] += 1;
       if (a === 'dec' && st.cart[arg]) { st.cart[arg] -= 1; if (!st.cart[arg]) delete st.cart[arg]; }
       if (a === 'slot') st.slot = arg;
-      if (a === 'order') { st.last = this.total(st); st.cart = {}; api.go('done'); }
+      if (a === 'order') { st.last = this.total(st); st.cart = {}; st.step = 0; st.tk = 0; api.go('done'); }
+      if (a === 'topup') st.wallet += 20;
     },
     count: (st) => Object.values(st.cart).reduce((a, b) => a + b, 0),
     total: (st) => Object.keys(st.cart).reduce((a, id) => a + MEALS.find((m) => m.id === id).p * st.cart[id], 0),
@@ -185,6 +206,7 @@
         const list = MEALS.filter((x) => st.cat === 'All' || x.c === st.cat);
         return `<div class="p-pad">
           <div class="p-top"><div><small>Pickup at ${st.slot}</small><h2>Ready near you</h2></div><button class="p-avatar cartbtn" data-go="cart">${ic('cart')}${n ? `<em>${n}</em>` : ''}</button></div>
+          <div class="p-promo">${ph('food-jollof', 'utensils')}<span><small>Today only</small><b>Free sobolo with any rice meal</b></span></div>
           <div class="p-chips">${['All', 'Rice', 'Local', 'Snacks'].map((c) => `<button data-act="cat:${c}"${st.cat === c ? ' class="on"' : ''}>${c}</button>`).join('')}</div>
           <div class="p-grid">${list.map((x) => `<div class="p-card"><button class="p-card-hit" data-act="open:${x.id}" aria-label="${esc(x.n)}">${ph('food-' + x.id, x.icon)}</button>
             <b>${esc(x.n)}</b><small>${esc(x.k)} · ${x.t} min</small><span class="p-card-foot"><b>${money(x.p)}</b><button class="p-add" data-act="quick:${x.id}" aria-label="Add">${ic('plus')}</button></span></div>`).join('')}</div>
@@ -205,10 +227,20 @@
           <div class="p-rows"><div><span>Subtotal</span><b>${money(sub)}</b></div><div><span>Service fee</span><b>${money(2)}</b></div><div><span>Total</span><b>${money(sub + 2)}</b></div></div>
           <span class="p-grow"></span><button class="p-btn" data-act="order">Place order · ${money(sub + 2)}</button></div>${tabBar('cart', FOOD_TABS)}`;
       }
-      if (key === 'done') return doneScreen('Order placed', `Pick it up at Counter 3 at ${st.slot}. Total paid ${money((st.last || 45) + 2)}.`);
+      if (key === 'done') return `<div class="p-center"><div class="p-check">${tick}</div><h1>Order placed</h1><p>Pick it up at Counter 3 at ${st.slot}. Total paid ${money((st.last || 45) + 2)}.</p><button class="p-btn" data-go="track">Track order</button><button class="p-link" data-go="home">Back to menu</button></div>`;
+      if (key === 'track') { const steps = [['Order received', 'The kitchen has your order'], ['Cooking', 'Your meal is on the fire'], ['Ready for pickup', 'Counter 3, show your code']]; return `<div class="p-pad">${back('home')}
+          <div class="p-head"><h2>${steps[st.step][0]}</h2><small>${st.step < 2 ? 'This updates on its own' : 'Enjoy your meal'}</small></div>
+          <span class="p-prog"><i style="width:${[20, 60, 100][st.step]}%"></i></span>
+          <div class="p-timeline">${steps.map((x, i) => `<div class="${i < st.step ? 'ok' : i === st.step ? (st.step === 2 ? 'ok' : 'next') : ''}"><i>${i < st.step || st.step === 2 ? tick : ''}</i><b>${x[0]}</b><small>${x[1]}</small></div>`).join('')}</div>
+          <div class="p-ticket"><div><small>Pickup code</small><b class="code">QC-4821</b><small>Counter 3 · ${st.slot}</small></div><i class="p-barcode"></i></div>
+          <span class="p-grow"></span><button class="p-btn" data-go="home">Order something else</button></div>`; }
       if (key === 'activity') return `<div class="p-pad"><div class="p-head"><h2>Orders</h2><small>Your recent orders</small></div>
           <div class="p-rows">${[['Jollof and grilled chicken', 'Night Market · today', 45], ['Waakye special', 'Bush Canteen · Monday', 35], ['Banku and tilapia', 'Central Cafeteria · last week', 60]].map((a) => `<div class="tall"><span><b>${a[0]}</b><small>${a[1]}</small></span><b>${money(a[2])}</b></div>`).join('')}</div></div>${tabBar('activity', FOOD_TABS)}`;
-      if (key === 'profile') return profile(this, FOOD_TABS);
+      if (key === 'profile') return shell(FOOD_TABS, `<div class="p-idcard"><small>Student card</small><b>Kwame Asante</b><span>Level 300 · Computer Science</span><i class="p-barcode flat"></i></div>
+          <div class="p-note">${ic('wallet')}<span><small>Meal wallet</small><b>${money(st.wallet)}</b></span><button class="p-pill" data-act="topup">Top up ${money(20)}</button></div>
+          ${h3('Dietary preferences')}${chipset(st, 'diet', ['Vegetarian', 'No pork', 'No nuts', 'Halal', 'Extra pepper'])}
+          <div class="p-rows"><div><span class="with-ic">${ic('pin')}Default pickup</span><b>Counter 3</b></div><div><span class="with-ic">${ic('list')}Orders this month</span><b>14</b></div></div>
+          <div class="p-rows">${sw(st, 'ready', 'Order-ready alerts', 'Buzz me when it is at the counter')}${sw(st, 'lunch', 'Lunch reminder', 'Every weekday at 11:30')}</div>`);
       return null;
     }
   };
@@ -229,7 +261,7 @@
       [{ key: 'detail', name: 'Event detail', desc: 'Photo, time, place' }, { key: 'pay', name: 'Tickets', desc: 'Type, quantity, total' }],
       { key: 'activity', name: 'My tickets', desc: 'Ticket wallet' }),
     taps: ['Get started', 'Continue', 'Tap an event', 'Get tickets', 'Pay now', 'Tab bar', 'Tab bar'],
-    init: () => ({ day: 'All', sel: 'afro', qty: 2, type: 'Regular' }),
+    init: () => ({ day: 'All', sel: 'afro', qty: 2, type: 'Regular', t: { 'int-Music': true, 'int-Art': true, 'fol-Night Shift Live': true, near: true } }),
     act(st, a, arg, api) {
       if (a === 'day') st.day = arg;
       if (a === 'open') { st.sel = arg; api.go('detail'); }
@@ -263,7 +295,10 @@
           <span class="p-grow"></span><button class="p-btn" data-go="done">Pay ${money(this.price(st))}</button></div>`;
       if (key === 'done') return `<div class="p-center"><div class="p-check">${tick}</div><h1>Tickets booked</h1><p>They are in your wallet. Show this at the gate.</p>${this.stub(st)}<button class="p-btn" data-go="home">Back to explore</button></div>`;
       if (key === 'activity') return `<div class="p-pad"><div class="p-head"><h2>My tickets</h2><small>Upcoming</small></div>${this.stub(st)}</div>${tabBar('activity', EV_TABS)}`;
-      if (key === 'profile') return profile(this, EV_TABS);
+      if (key === 'profile') return shell(EV_TABS, `<div class="p-pass"><div><small>Gather member</small><b>Kwame Asante</b><span>Accra · since 2026</span></div><i class="p-qr"></i></div>
+          ${h3('Your interests')}${chipset(st, 'int', ['Music', 'Tech', 'Art', 'Food', 'Fitness', 'Comedy'])}
+          ${h3('Hosts you follow')}<div class="p-rows">${['Night Shift Live', 'Accra Devs', 'Studio Collective'].map((x) => `<div class="tall"><span class="with-ic"><i class="p-face">${x[0]}</i><b>${x}</b></span><button class="p-pill${on(st, 'fol-' + x) ? ' on' : ''}" data-act="tg:fol-${x}">${on(st, 'fol-' + x) ? 'Following' : 'Follow'}</button></div>`).join('')}</div>
+          <div class="p-rows">${sw(st, 'near', 'Events near me', 'Weekly picks within 10 km')}${sw(st, 'price', 'Price drops', 'When a saved event gets cheaper')}</div>`);
       return null;
     }
   };
@@ -280,10 +315,12 @@
       [{ key: 'detail', name: 'Workout', desc: 'Checklist of moves' }, { key: 'timer', name: 'Session', desc: 'Working rest timer' }],
       { key: 'activity', name: 'Progress', desc: 'Weekly chart' }),
     taps: ['Get started', 'Continue', "Today's workout", 'Start workout', 'Finish', 'Tab bar', 'Tab bar'],
-    init: () => ({ done: [true, true, false, false, false, false], left: 45, running: false, move: 2 }),
+    init: () => ({ done: [true, true, false, false, false, false], left: 45, running: false, move: 2, goal: 4, t: { lb: false, remind: true } }),
     act(st, a, arg) {
       if (a === 'check') st.done[Number(arg)] = !st.done[Number(arg)];
       if (a === 'toggle') st.running = !st.running;
+      if (a === 'inc' && arg === 'goal') st.goal = Math.min(7, st.goal + 1);
+      if (a === 'dec' && arg === 'goal') st.goal = Math.max(1, st.goal - 1);
       if (a === 'next') { st.done[st.move] = true; st.move = Math.min(MOVES.length - 1, st.move + 1); st.left = 45; st.running = false; }
     },
     tick(st) { if (!st.running) return false; st.left -= 1; if (st.left <= 0) { st.left = 0; st.running = false; } return true; },
@@ -310,7 +347,11 @@
       if (key === 'activity') return `<div class="p-pad"><div class="p-head"><h2>Progress</h2><small>Minutes this week</small></div>
           <div class="p-chart">${[['M', 45], ['T', 0], ['W', 50], ['T', 20], ['F', 30], ['S', 0], ['S', 0]].map((b) => `<div><i style="height:${b[1] * 1.6}%"></i><small>${b[0]}</small></div>`).join('')}</div>
           <div class="p-rows"><div><span>Total</span><b>145 min</b></div><div><span>Workouts</span><b>4 of 5</b></div><div><span>Best streak</span><b>12 days</b></div></div></div>${tabBar('activity', GYM_TABS)}`;
-      if (key === 'profile') return profile(this, GYM_TABS);
+      if (key === 'profile') { const lb = on(st, 'lb'), w = (kg) => lb ? Math.round(kg * 2.205) + ' lb' : kg + ' kg'; return shell(GYM_TABS, `<div class="p-idrow"><div class="p-avatar big">K</div><div><h2>Kwame</h2><small class="p-cap">Intermediate · 4 months in</small></div></div>
+          <div class="p-stats cards">${[[w(78), 'Weight'], ['1.78 m', 'Height'], [w(74), 'Goal']].map((x) => `<div><b>${x[0]}</b><small>${x[1]}</small></div>`).join('')}</div>
+          <div class="p-between"><span><b>Weekly goal</b><small class="p-cap block">Workouts per week</small></span>${stepper('goal', st.goal)}</div>
+          ${h3('Badges')}<div class="p-badges">${[['flame', '12-day streak'], ['star', '50 workouts'], ['bolt', 'New bench best']].map((x) => `<div><i>${ic(x[0])}</i><small>${x[1]}</small></div>`).join('')}</div>
+          <div class="p-rows">${sw(st, 'lb', 'Use pounds', 'Switch weights from kg to lb')}${sw(st, 'remind', 'Workout reminders', 'An hour before each session')}${sw(st, 'rest', 'Rest-day nudges', 'Stretching and sleep tips')}</div>`); }
       return null;
     }
   };
@@ -322,8 +363,8 @@
       screens: appScreens({ key: 'home', name: d.homeName, desc: 'Searchable list' },
         [{ key: 'detail', name: d.detailName, desc: 'Details and main action' }, { key: 'pay', name: d.payName, desc: 'Options and confirm' }]),
       taps: ['Get started', 'Continue', 'Tap an item', d.cta, 'Confirm', 'Tab bar', 'Tab bar'],
-      init: () => ({ sel: 0, opt: 0 }),
-      act(st, a, arg, api) { if (a === 'open') { st.sel = Number(arg); api.go('detail'); } if (a === 'opt') st.opt = Number(arg); },
+      init: () => ({ sel: 0, opt: 0, t: { 'crs-Calculus II': true, 'crs-Data Structures': true, 'day-Tue': true, 'day-Wed': true, remind: true } }),
+      act(st, a, arg, api) { if (a === 'open') { st.sel = Number(arg); api.go('detail'); } if (a === 'opt') st.opt = Number(arg); if (a === 'style') st.style = Number(arg); },
       render(key, st) {
         const it = d.items[st.sel];
         if (key === 'home') return `<div class="p-pad">
@@ -345,6 +386,11 @@
         if (key === 'done') return doneScreen(d.doneTitle, `${it.t}. ${d.doneSub}`);
         if (key === 'activity') return `<div class="p-pad"><div class="p-head"><h2>Activity</h2><small>Your recent history</small></div>
             <div class="p-rows">${d.items.map((x) => `<div class="tall"><span><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span><b>${esc(x.v)}</b></div>`).join('')}</div></div>${tabBar('activity', TABS)}`;
+        if (key === 'profile' && d.courses) return shell(TABS, `<div class="p-idrow"><div class="p-avatar big">K</div><div><h2>Kwame Asante</h2><small class="p-cap">Level 300 · Computer Science</small></div></div>
+            ${h3('My courses')}${chipset(st, 'crs', d.courses)}
+            ${h3('Free to study on')}${chipset(st, 'day', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'])}
+            ${h3('How I study best')}<div class="p-options">${['Quiet', 'Discussion', 'Past papers'].map((o, i) => `<button data-act="style:${i}"${(st.style || 0) === i ? ' class="on"' : ''}>${o}</button>`).join('')}</div>
+            <div class="p-rows">${sw(st, 'remind', 'Session reminders', 'An hour before you are due')}${sw(st, 'match', 'Suggest study partners', 'People in the same courses')}</div>`);
         return null;
       }
     });
@@ -358,7 +404,8 @@
     items: [{ t: 'Calculus II past questions', s: 'Tue 4 pm · Library L2', v: '5 going' }, { t: 'Data Structures revision', s: 'Wed 6 pm · Lab 4', v: '8 going', icon: 'layers' }, { t: 'Thermodynamics problem set', s: 'Fri 2 pm · Room B12', v: '3 going', icon: 'flame' }, { t: 'Organic Chemistry quiz prep', s: 'Sat 10 am · Online', v: '6 going', icon: 'target' }],
     rows: [['When', 'This week'], ['Where', 'See the session card'], ['Host', 'Kojo A.']],
     payLabel: 'How will you take part?', options: ['In person', 'Online', 'Just notes'],
-    doneTitle: "You're in", doneSub: 'We will remind you an hour before.'
+    doneTitle: "You're in", doneSub: 'We will remind you an hour before.',
+    courses: ['Calculus II', 'Data Structures', 'Thermodynamics', 'Organic Chemistry', 'Statistics']
   });
   APPS.generic = listApp({
     key: 'generic', name: 'Your concept', icon: 'spark', mark: 'C', accent: '#ff7a59',
@@ -518,8 +565,9 @@
     const site = idea.kind === 'site';
     const keys = idea.screens.map((s) => s.key);
     const st = idea.init ? idea.init() : {};
+    st.t = st.t || {};
     let index = 0, hist = [0], pos = 0, timer = 0;
-    host.innerHTML = `<div class="proto ${site ? 'site' : 'app'}" style="--p-accent:${idea.accent}">${statusRow()}${site ? chrome(idea) : ''}<div class="p-view"></div><div class="p-home"></div></div>`;
+    host.innerHTML = `<div class="proto ${site ? 'site' : 'app'} ${idea.cls || ''}" style="--p-accent:${idea.accent}">${statusRow()}${site ? chrome(idea) : ''}<div class="p-view"></div><div class="p-home"></div></div>`;
     const root = host.firstElementChild;
     const view = root.querySelector('.p-view');
 
@@ -533,8 +581,22 @@
         root.querySelector('[data-nav="back"]').disabled = pos === 0;
         root.querySelector('[data-nav="fwd"]').disabled = pos >= hist.length - 1;
       }
+      journey();
       if (!silent && typeof o.onNavigate === 'function') o.onNavigate(index);
     }
+    /* Scroll stories: each [data-journey] block gets --p (0 to 1) as it scrolls past. */
+    let raf = 0;
+    function journey() {
+      raf = 0;
+      const vh = view.clientHeight;
+      view.style.setProperty('--vh', vh + 'px');
+      view.querySelectorAll('[data-journey]').forEach((el) => {
+        const range = Math.max(1, el.offsetHeight - vh);
+        el.style.setProperty('--p', Math.min(1, Math.max(0, (view.scrollTop - el.offsetTop) / range)).toFixed(4));
+      });
+    }
+    view.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(journey); }, { passive: true });
+    if (window.ResizeObserver) new ResizeObserver(() => journey()).observe(view);
     function go(target, silent) {
       const i = typeof target === 'number' ? target : keys.indexOf(target);
       if (i < 0 || i >= keys.length) return;
@@ -550,9 +612,11 @@
         return;
       }
       const act = e.target.closest('[data-act]');
-      if (act && idea.act) {
+      if (act) {
+        if (!idea.act) idea.act = () => {};
         const parts = act.dataset.act.split(':'), before = index;
         let moved = false;
+        if (parts[0] === 'tg') { const k = parts.slice(1).join(':'); st.t[k] = !st.t[k]; }
         idea.act(st, parts[0], parts.slice(1).join(':'), { go: (k) => { moved = true; go(k); } });
         if (!moved && index === before) paint(true, true);
         return;
@@ -573,7 +637,9 @@
       timer = setInterval(() => {
         if (!root.isConnected) { clearInterval(timer); return; }
         const was = st.running;
-        if (!idea.tick(st)) return;
+        const r = idea.tick(st, keys[index]);
+        if (r === 'paint') { paint(true, true); return; }
+        if (!r) return;
         const t = view.querySelector('[data-timer]'), ring = view.querySelector('[data-timer-ring]');
         if (t) t.textContent = mmss(st.left);
         if (ring) ring.style.setProperty('--pct', Math.round(st.left / 45 * 100));
@@ -593,5 +659,6 @@
     };
   }
 
-  window.SelasiProto = { IDEAS: IDEAS, ACCENTS: ACCENTS, VARIANTS: VARIANTS, mount: mount };
+  window.SelasiProto = { IDEAS: IDEAS, ACCENTS: ACCENTS, VARIANTS: VARIANTS, mount: mount,
+    kit: { ic: ic, ph: ph, esc: esc, money: money, siteNav: siteNav, siteFoot: siteFoot, field: field, sent: sent, stepper: stepper } };
 })();

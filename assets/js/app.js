@@ -48,6 +48,8 @@
     cake: '<path d="M5 20v-7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7M3 20h18M5 15.5c2.3 1.5 4.700-1.500 7 0s4.700 1.500 7 0M12 11V7M12 4.500v.010"/>',
     palette: '<path d="M12 3.500a8.500 8.500 0 1 0 0 17c1.500 0 2-1 2-2 0-1.500 1-2 2.500-2H18a2.500 2.500 0 0 0 2.500-2.500c0-4.700-3.800-8.500-8.500-8.500z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="8" r="1"/><circle cx="16" cy="11" r="1"/>',
     scissors: '<circle cx="6.500" cy="7" r="2.500"/><circle cx="6.500" cy="17" r="2.500"/><path d="M8.700 8.300L20 18M8.700 15.700L20 6"/>',
+    box: '<path d="M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8"/>',
+    headphones: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4.500" height="7" rx="2"/><rect x="16.500" y="13" width="4.500" height="7" rx="2"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/>'
   };
   const icon = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -340,6 +342,8 @@
   /* ── Scripted replies ──────────────────────────────────────────────── */
   function pickIdea(text) {
     const t = text.toLowerCase(), I = Proto.IDEAS;
+    if (/deliver|freight|logistic|truck|courier|shipping/.test(t)) return I.freight;
+    if (/headphone|headset|earbud|speaker|audio/.test(t)) return I.auro;
     if (/bak|cake|bread|pastr/.test(t)) return I.bakery;
     if (/barber|salon|haircut|book a slot/.test(t)) return I.salon;
     if (/portfolio|designer|case stud/.test(t)) return I.portfolio;
@@ -384,7 +388,9 @@
     if (small.matches) setView('device');
     await unlock();
     await say(idea.kind === 'site'
-      ? `${esc(idea.name)} is open in the browser on the ${esc(DEVICE_LABEL[ui.device])}. Use the links on the page and the back button to move around. Try the Laptop tab for the wide layout.`
+      ? (idea.key === 'freight' || idea.key === 'auro'
+        ? `${esc(idea.name)} is open in the browser. <b>Scroll the page on the device</b> and the scene plays with your scroll. It looks best on the Laptop tab.`
+        : `${esc(idea.name)} is open in the browser on the ${esc(DEVICE_LABEL[ui.device])}. Use the links on the page and the back button to move around. Try the Laptop tab for the wide layout.`)
       : `${idea.screens.length} screens are live on the ${esc(DEVICE_LABEL[ui.device])}. Tap <b>Get started</b> on the device. The controls work, so try the buttons, steppers and filters.`);
     setChips(afterRender());
   }

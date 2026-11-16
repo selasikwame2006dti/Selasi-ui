@@ -18,6 +18,8 @@ python3 -m http.server 8080
 - `assets/css/app.css`: theme tokens (dark and light) and layout
 - `assets/js/app.js`: chats and projects, device stage, stamina, settings, captures, handoff
 - `assets/js/prototype.js`: the sample prototypes (apps fill the screen, sites open in browser chrome)
+- `assets/js/stories.js`: the two scroll-story sites (3D delivery truck, exploded headphones)
+- `assets/js/art.js`: illustrations drawn in code for the prototype image slots
 - `assets/js/device-lockscreens.js`, `assets/css/device-lockscreens.css`,
   `assets/fonts/`: the device frames and lock screens from Selasi Coder
 
@@ -25,7 +27,7 @@ python3 -m http.server 8080
 
 The sample prototypes have photo slots. Add an image to `assets/img/` and map
 its slot name to the file in `assets/img/photos.js` (the slot names are listed
-there). Slots without a photo show a drawn tile with an icon.
+there). Slots without a photo show an illustration from `assets/js/art.js`.
 
 This is a concept build with no backend. Chat replies are scripted, and
 captures, download, GitHub push and the Coder handoff show what will happen
