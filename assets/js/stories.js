@@ -1,43 +1,131 @@
 /* Selasi AI concept build: scroll-story sites.
-   Each has a tall [data-journey] block; the prototype engine feeds it --p
-   (0 to 1) as the visitor scrolls, and CSS turns that into the animation.
+   Each has tall [data-journey] blocks; the prototype engine feeds each one
+   --p (0 to 1) as the visitor scrolls, and CSS turns that into animation.
+   Styles live in assets/css/stories.css.
 
-   - Volta Freight: a 3D truck built from CSS boxes. Cargo loads from the side
-     view, the camera swings to a top view, then the truck drives its route.
-   - Auro: headphones whose ear cup separates into labelled layers. */
+   - Volta Freight: a 3D box truck built from CSS planes. Rear doors open,
+     pallets roll in, the camera swings round and up to a top view, the
+     truck drives its route, then a second section follows it to a house.
+   - Auro: 3D over-ear headphones. One cup separates into labelled layers,
+     the model turns to show its controls, then returns spinning. */
 (function () {
   'use strict';
   const P = window.SelasiProto, K = P.kit, ic = K.ic, esc = K.esc, money = K.money;
+  const n = (v) => Number(v.toFixed(3));
 
+  /* ── 3D primitives (units are em; y is up) ─────────────────────────── */
   const cube = (x, y, z, w, h, d, c, cls, extra) =>
-    `<div class="cube ${cls || ''}" style="--x:${x};--y:${y};--z:${z};--w:${w};--h:${h};--d:${d};--c:${c};${extra || ''}"><i class="f"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="t"></i></div>`;
-  const caption = (n, tag, title, text) => `<div class="j-cap c${n}"><span class="s-tag">${tag}</span><h1>${title}</h1><p>${text}</p></div>`;
+    `<div class="cube ${cls || ''}" style="--x:${x};--y:${y};--z:${z};--w:${w};--h:${h};--d:${d};--c:${c};${extra || ''}"><i class="f"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="t"></i>${/six/.test(cls || '') ? '<i class="u"></i>' : ''}</div>`;
+  /* A free rectangle centred on (x, y, z), then rotated. */
+  const plane = (x, y, z, w, h, rot, cls, extra) =>
+    `<i class="pl ${cls || ''}" style="width:${w}em;height:${h}em;transform:translate3d(${n(x - w / 2)}em,${n(-y - h / 2)}em,${z}em) ${rot || ''};${extra || ''}"></i>`;
+  const caption = (k, tag, title, text) => `<div class="j-cap c${k}"><span class="s-tag">${tag}</span><h1>${title}</h1><p>${text}</p></div>`;
 
-  /* ── Volta Freight ─────────────────────────────────────────────────── */
+  /* ── Volta Freight: the truck ──────────────────────────────────────── */
+  function wheel(x, z) {
+    const r = 1.15, wd = 0.95, N = 16, seg = n(2 * Math.PI * r / N * 1.06);
+    let tread = '';
+    for (let k = 0; k < N; k++) tread += `<i class="tread" style="width:${seg}em;height:${wd}em;margin:${-wd / 2}em 0 0 ${-seg / 2}em;transform:rotateZ(${k * 360 / N}deg) translateY(${-r}em) rotateX(90deg)"></i>`;
+    return `<div class="wheel3" style="transform:translate3d(${x}em,${-r}em,${z}em)"><div class="spin">${tread}
+      <i class="wd" style="transform:translateZ(${wd / 2}em)"></i><i class="wd in" style="transform:translateZ(${-wd / 2}em)"></i></div></div>`;
+  }
+  function pallet(x, z, h, i) {
+    return `<div class="pal" style="--dl:${n(i * 0.02)}">${cube(x, 2.28, z, 2.1, 0.22, 2.2, '#a9824f')}${cube(x, 2.5, z, 1.95, h, 2.05, ['#c99a5b', '#bd8c4c', '#d2a567'][i % 3], 'carton')}</div>`;
+  }
+  function truck3d() {
+    let pals = '', i = 0;
+    [1.9, -0.35, -2.6, -4.85, -7.1].forEach((x) => { [-1.25, 1.25].forEach((z) => { pals += pallet(x, z, [3.2, 2.5, 3.6, 2.9][i % 4], i); i++; }); });
+    return `<div class="tk">
+        <i class="tk-shadow"></i>
+        ${cube(-1.4, 1.5, 0, 15.6, 0.6, 2.9, '#1c2026')}
+        ${cube(-2.9, 2.14, 0, 12.2, 0.14, 5.3, '#6b5238', 'deck')}
+        ${pals}
+        ${cube(-2.9, 2.2, 0, 12.2, 5.6, 5.3, '#eef0f3', 'cargo')}
+        <div class="door near" style="transform:translate3d(-9em,-7.8em,2.65em) rotateY(calc(var(--door) * 108deg))"><i style="transform:rotateY(90deg)"></i></div>
+        <div class="door far" style="transform:translate3d(-9em,-7.8em,-2.65em) rotateY(calc(var(--door) * -108deg))"><i style="transform:rotateY(-90deg)"></i></div>
+        ${cube(5.525, 1.55, 0, 3.95, 4.9, 5, '#f4f5f7', 'cabx')}
+        ${plane(5.35, 7.02, 0, 3.5, 4.6, 'rotateZ(19.2deg) rotateX(90deg)', 'defl')}
+        ${plane(5.35, 7.02, 2.3, 3.3, 1.15, '', 'defl side')}${plane(5.35, 7.02, -2.3, 3.3, 1.15, '', 'defl side')}
+        ${plane(3.7, 7.02, 0, 4.6, 1.15, 'rotateY(-90deg)', 'defl back')}
+        ${cube(7.62, 5.95, 0, 0.42, 0.16, 5, '#15181d')}
+        ${cube(7.4, 4.3, 2.85, 0.22, 1.5, 0.34, '#15181d')}${cube(7.4, 4.3, -2.85, 0.22, 1.5, 0.34, '#15181d')}
+        ${cube(7.5, 1.2, 0, 0.5, 1.05, 5.1, '#1b1f25', 'bumper')}
+        ${cube(1.3, 1, 2.2, 2.6, 1, 0.85, '#c3c8cf', 'tank')}${cube(1.3, 1, -2.2, 2.2, 1, 0.85, '#2a2f37')}
+        ${cube(-1.9, 1.25, 2.6, 4, 0.16, 0.1, '#d6dade')}${cube(-1.9, 1.75, 2.6, 4, 0.16, 0.1, '#d6dade')}
+        ${cube(-1.9, 1.25, -2.6, 4, 0.16, 0.1, '#d6dade')}${cube(-1.9, 1.75, -2.6, 4, 0.16, 0.1, '#d6dade')}
+        ${cube(-5.2, 2.02, 2.25, 3.1, 0.16, 1.05, '#14171c')}${cube(-5.2, 2.02, -2.25, 3.1, 0.16, 1.05, '#14171c')}
+        ${cube(-9.15, 0.95, 0, 0.3, 0.55, 5.2, '#1b1f25', 'underrun')}
+        ${wheel(5.6, 2.3)}${wheel(5.6, -2.3)}${wheel(-5.2, 2.3)}${wheel(-5.2, -2.3)}
+      </div>`;
+  }
   function truckScene() {
-    const boxes = [];
-    const tones = ['#c99a5b', '#b98848', '#d4a96c', '#c08f52'];
-    let i = 0;
-    [-8.6, -6.2, -3.8, -1.4, 1].forEach((x, col) => {
-      [-1.25, 1.25].forEach((z) => {
-        boxes.push(cube(x, 1.7, z, 2.2, 2, 2.2, tones[i % 4], 'box', `--dl:${(i * 0.022).toFixed(3)}`)); i++;
-        if (col < 3 && z < 0) { boxes.push(cube(x, 3.7, z, 2.2, 1.7, 2.2, tones[(i + 1) % 4], 'box', `--dl:${(i * 0.022).toFixed(3)}`)); i++; }
-      });
-    });
-    const wheels = [-8, -5.4, 6.6].map((x) => [-2.5, 2.5].map((z) => cube(x, 0, z, 1.9, 1.9, 0.7, '#12161c', 'wheel')).join('')).join('');
     return `<div class="j-scene"><div class="j-world">
         <div class="j-ground"><i class="j-route"></i><i class="j-pin"></i><i class="j-pin b"></i></div>
-        <div class="j-truck">
-          ${cube(-3.4, 1.2, 0, 13.6, 0.5, 5.2, '#2b3442')}
-          ${cube(-3.4, 1.7, -2.5, 13.6, 4.3, 0.16, '#e9edf2', 'wall')}
-          ${cube(3.3, 1.7, 0, 0.16, 4.3, 5.2, '#dfe4ea', 'wall')}
-          ${boxes.join('')}
-          ${cube(6.6, 1.2, 0, 4.2, 4.3, 5, 'var(--p-accent)', 'cab')}
-          ${cube(8.2, 3.3, 0, 1.1, 1.7, 4.3, '#1d2a3a')}
-          ${cube(8.9, 1.1, 0, 0.5, 0.9, 5.2, '#1a1f27')}
-          ${wheels}
-        </div>
+        ${cube(-4, 0, -17, 46, 8, 9, '#aeb6c0', 'depot')}
+        ${cube(-17.5, 0, 0, 14, 2.05, 4.9, '#343b45', 'belt')}
+        <div class="j-truck">${truck3d()}</div>
       </div></div>`;
+  }
+
+  /* Side-view truck drawn as SVG, for the last-mile section. Faces right. */
+  function truckSide() {
+    const rivets = (y) => Array.from({ length: 27 }, (_, i) => `<circle cx="${50 + i * 14.2}" cy="${y}" r="1.300"/>`).join('');
+    const wheelG = (cx) => `<g class="whl" style="transform-origin:${cx}px 214px"><circle cx="${cx}" cy="214" r="31" fill="#15171b"/><circle cx="${cx}" cy="214" r="27" fill="none" stroke="#2b2f36" stroke-width="3"/><circle cx="${cx}" cy="214" r="18" fill="#d7dbe0"/><circle cx="${cx}" cy="214" r="18" fill="none" stroke="#8f96a0" stroke-width="2"/>
+      ${[0, 72, 144, 216, 288].map((a) => `<ellipse cx="${cx}" cy="${214 - 11}" rx="3.400" ry="4.600" fill="#3a3f47" transform="rotate(${a} ${cx} 214)"/>`).join('')}<circle cx="${cx}" cy="214" r="6" fill="#565c66"/><circle cx="${cx}" cy="214" r="2.500" fill="#1d2025"/></g>`;
+    return `<svg class="tk2d" viewBox="0 0 640 260" aria-hidden="true">
+      <defs><linearGradient id="tkBox" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfcfd"/><stop offset="1" stop-color="#dfe3e8"/></linearGradient>
+      <linearGradient id="tkGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a6076"/><stop offset=".55" stop-color="#17222e"/><stop offset="1" stop-color="#0d151d"/></linearGradient></defs>
+      <ellipse cx="320" cy="246" rx="300" ry="9" fill="#000" opacity=".2"/>
+      <rect x="52" y="188" width="392" height="16" rx="2" fill="#1c2026"/>
+      <rect x="34" y="196" width="14" height="30" rx="2" fill="#1b1f25"/><rect x="34" y="200" width="6" height="10" rx="1.500" fill="#e23b2e"/><rect x="34" y="212" width="6" height="6" rx="1.500" fill="#f5a623"/>
+      <rect x="152" y="206" width="140" height="5" rx="2" fill="#cfd4da"/><rect x="152" y="218" width="140" height="5" rx="2" fill="#cfd4da"/>
+      <rect x="300" y="198" width="74" height="28" rx="9" fill="#c5cad1"/><rect x="306" y="203" width="62" height="5" rx="2.500" fill="#fff" opacity=".6"/><rect x="380" y="200" width="46" height="24" rx="4" fill="#2a2f37"/>
+      <rect x="40" y="38" width="394" height="152" rx="3" fill="#c3c8cf"/><rect x="45" y="43" width="384" height="142" fill="url(#tkBox)"/>
+      <path d="M270 185 L330 43 H368 L308 185z M320 185 L380 43 H429 V185z" fill="var(--p-accent)"/>
+      <g fill="#9aa1ab">${rivets(41)}${rivets(187.500)}</g>
+      <text x="62" y="112" font-family="Inter, sans-serif" font-weight="800" font-size="27" letter-spacing="-.5" fill="#1b1f25">VOLTA</text><text x="62" y="134" font-family="Inter, sans-serif" font-weight="600" font-size="13" letter-spacing="3" fill="#6b727d">FREIGHT</text>
+      <path d="M447 98 l9 -32 q42 -8 62 8 l10 24z" fill="#f2f3f5"/><path d="M456 66 q42 -8 62 8" fill="none" stroke="#c9ced5" stroke-width="2"/>
+      <path d="M442 98 h88 q22 2 29 27 l9 52 v52 h-126z" fill="#f6f7f9"/><path d="M559 125 l9 52 v52 h-10 v-104z" fill="#dfe3e8"/>
+      <path d="M474 108 h50 q13 2 18 18 l6 30 h-74z" fill="url(#tkGlass)"/><path d="M482 112 l22 0 l-14 40 l-16 0z" fill="#fff" opacity=".13"/>
+      <path d="M470 104 v118 M552 160 v62" stroke="#c9ced5" stroke-width="1.500" fill="none"/><rect x="478" y="168" width="14" height="4" rx="2" fill="#22262c"/>
+      <rect x="528" y="92" width="34" height="6" rx="2" fill="#15181d"/><path d="M556 112 h10 v34 h-10z" fill="#15181d"/><path d="M548 118 h8" stroke="#15181d" stroke-width="3"/>
+      <rect x="558" y="180" width="11" height="18" rx="3" fill="#fff3c2"/><rect x="558" y="200" width="11" height="6" rx="2" fill="#f5a623"/>
+      <path d="M438 204 h134 v22 q0 8 -8 8 h-126z" fill="#1b1f25"/><rect x="446" y="226" width="22" height="6" rx="2" fill="#2d323a"/>
+      <path d="M470 214 a36 36 0 0 1 72 0z" fill="#14171c"/><path d="M82 214 a36 36 0 0 1 72 0z" fill="#14171c"/>
+      ${wheelG(506)}${wheelG(118)}
+      <path d="M72 196 v34" stroke="#14171c" stroke-width="5" stroke-linecap="round"/>
+    </svg>`;
+  }
+  const strip = (cls, body) => `<svg class="mile-strip ${cls}" viewBox="0 0 1800 200" preserveAspectRatio="none" aria-hidden="true">${body}</svg>`;
+  function scenery() {
+    let far = '<path d="M0 200 V120 Q150 60 300 110 T600 100 T900 120 T1200 90 T1500 115 T1800 100 V200z" fill="#b7c9b0"/><path d="M0 200 V150 Q200 110 400 145 T800 140 T1200 150 T1600 135 T1800 150 V200z" fill="#9db796"/>';
+    let mid = '';
+    for (let i = 0; i < 18; i++) {
+      const x = 40 + i * 100 + (i % 3) * 14;
+      mid += i % 4 === 1
+        ? `<rect x="${x}" y="${96 - (i % 3) * 16}" width="56" height="${104 + (i % 3) * 16}" fill="${['#d9c9b4', '#c9d2dc', '#e2d3c0'][i % 3]}"/>${[0, 1, 2].map((r) => [0, 1].map((c) => `<rect x="${x + 9 + c * 22}" y="${110 - (i % 3) * 16 + r * 24}" width="13" height="13" fill="#7f93a8" opacity=".7"/>`).join('')).join('')}`
+        : `<rect x="${x + 24}" y="140" width="6" height="60" fill="#7a5a3c"/><circle cx="${x + 27}" cy="${126 - (i % 2) * 10}" r="${22 + (i % 3) * 4}" fill="${i % 2 ? '#4f8a52' : '#5f9a5c'}"/>`;
+    }
+    let near = '';
+    for (let i = 0; i < 12; i++) near += `<rect x="${60 + i * 150}" y="60" width="4" height="140" fill="#5a6470"/><rect x="${60 + i * 150}" y="60" width="34" height="4" rx="2" fill="#5a6470"/><circle cx="${92 + i * 150}" cy="66" r="5" fill="#ffe9a3"/>`;
+    return strip('far', far) + strip('mid', mid) + strip('near', near);
+  }
+  const house = () => `<svg class="mile-house" viewBox="0 0 260 240" aria-hidden="true">
+      <circle cx="222" cy="120" r="34" fill="#4f8a52"/><rect x="218" y="140" width="8" height="90" fill="#7a5a3c"/>
+      <rect x="30" y="104" width="170" height="126" fill="#f3e9d8"/><path d="M14 110 L115 34 L216 110z" fill="#b4552d"/><path d="M14 110 L115 34 L216 110" fill="none" stroke="#8f3f1f" stroke-width="5" stroke-linejoin="round"/>
+      <rect x="150" y="56" width="18" height="34" fill="#8f3f1f"/>
+      <rect x="52" y="130" width="46" height="42" rx="3" fill="#8fb4d6"/><path d="M75 130 v42 M52 151 h46" stroke="#fff" stroke-width="3"/>
+      <rect x="126" y="140" width="46" height="90" rx="3" fill="#6b4a2a"/><circle cx="163" cy="188" r="3.500" fill="#f2c96a"/><rect x="116" y="226" width="66" height="8" rx="2" fill="#c9b79c"/>
+      <g class="mile-parcel"><rect x="88" y="204" width="30" height="26" rx="2" fill="#c99a5b"/><path d="M88 214 h30 M103 204 v26" stroke="#a9773a" stroke-width="2.500"/><circle cx="118" cy="204" r="10" fill="#1f8a5b"/><path d="M113 204 l4 4 l7 -8" fill="none" stroke="#fff" stroke-width="2.500" stroke-linecap="round" stroke-linejoin="round"/></g>
+    </svg>`;
+  function lastMile() {
+    const steps = [['08:10', 'Collected in Tema', 'Scanned at the dock and sealed.'], ['10:45', 'On the N1', 'You can see the truck move on the map.'], ['14:20', 'Turning into your street', 'A text goes out ten minutes before arrival.'], ['14:32', 'Delivered', 'Photo and signature sent to your phone.']];
+    return `<section class="j-wrap mile" data-journey><div class="j-stage">
+        <div class="mile-head"><span class="s-tag">The last mile</span><h2>All the way to the door.</h2></div>
+        <div class="mile-lane"><i class="mile-sun"></i>${scenery()}<i class="mile-road"></i>${house()}<div class="mile-truck">${truckSide()}</div></div>
+        <div class="mile-steps">${steps.map((s, i) => `<div class="ms" style="--i:${i}"><small>${s[0]}</small><b>${s[1]}</b><span>${s[2]}</span></div>`).join('')}</div>
+        <div class="mile-bar"><i></i></div>
+      </div></section>`;
   }
 
   const CITIES = { Accra: 0, Kumasi: 250, Takoradi: 220, Tamale: 610 };
@@ -45,7 +133,7 @@
     key: 'freight', kind: 'site', name: 'Volta Freight', mark: 'V', accent: '#f08a24', domain: 'voltafreight.preview', cls: 'x-freight',
     prompt: 'An animated 3D website for a delivery company, with a truck that loads cargo as you scroll and then shows the route from above.',
     cta: 'Get a quote', ctaGo: 'quote',
-    screens: [{ key: 'home', name: 'Home', desc: '3D scroll story: load, lift, route' }, { key: 'track', name: 'Track', desc: 'Live map and status' }, { key: 'quote', name: 'Quote', desc: 'Price updates as you choose' }, { key: 'sent', name: 'Confirmation', desc: 'Quote requested' }],
+    screens: [{ key: 'home', name: 'Home', desc: '3D story: load, lift, route, last mile' }, { key: 'track', name: 'Track', desc: 'Live map and status' }, { key: 'quote', name: 'Quote', desc: 'Price updates as you choose' }, { key: 'sent', name: 'Confirmation', desc: 'Quote requested' }],
     taps: ['Track a shipment', 'Get a quote', 'Request pickup'],
     init: () => ({ pos: 34, to: 'Kumasi', pal: 4, veh: 1, code: 'VF-20418' }),
     act(st, a, arg) {
@@ -61,13 +149,15 @@
       let body;
       if (key === 'home') body = `<section class="j-wrap" data-journey><div class="j-stage">
             <i class="j-sky"></i>${truckScene()}
-            ${caption(1, 'Load', 'Loaded in minutes.', 'Scroll to load the trailer. Every pallet has a slot before the truck arrives.')}
-            ${caption(2, 'Scan', 'Every pallet counted.', 'From above, dispatch sees exactly what is on board and what is still missing.')}
+            ${caption(1, 'Load', 'Loaded in minutes.', 'Scroll to open the doors and roll the pallets in. Every one has a slot before the truck arrives.')}
+            ${caption(2, 'Count', 'Every pallet counted.', 'From above, dispatch sees exactly what is on board and what is still missing.')}
             ${caption(3, 'Track', 'Followed all the way.', 'The route is live from the yard to the last drop.')}
             <span class="j-hint">${ic('right')}Scroll</span>
           </div></section>
           <section class="f-stats">${[['98%', 'on-time drops'], ['140', 'trucks on the road'], ['16', 'regions covered']].map((x) => `<div><b>${x[0]}</b><small>${x[1]}</small></div>`).join('')}</section>
+          ${lastMile()}
           <section class="s-points">${[['bolt', 'Same-day city runs', 'Booked before noon, delivered before dark.'], ['box', 'Cross-country haul', 'Full and part loads between every region.'], ['shield', 'Insured and sealed', 'Tamper seals and cover on every trip.']].map((p) => `<div><i>${ic(p[0])}</i><b>${p[1]}</b><small>${p[2]}</small></div>`).join('')}</section>
+          <section class="x-fleet"><h2>The fleet</h2><div>${[['Van', '1.2 t · city drops', 0.62], ['Box truck', '8 t · regional', 0.8], ['Trailer', '26 t · cross-country', 1]].map((f) => `<article><div class="fl" style="--s:${f[2]}">${truckSide()}</div><b>${f[0]}</b><small>${f[1]}</small></article>`).join('')}</div></section>
           <section class="s-quote"><p>Track a shipment</p><div class="x-track"><input value="${esc(st.code)}" aria-label="Tracking code"><button data-go="track">Track ${ic('arrow')}</button></div></section>`;
       else if (key === 'track') {
         const steps = [['Collected', 'Tema yard'], ['On the road', 'N6 highway'], ['Out for delivery', st.to], ['Delivered', 'Signed for']];
@@ -87,28 +177,47 @@
     }
   };
 
-  /* ── Auro headphones ───────────────────────────────────────────────── */
-  const disc = (k, label, note, side, body) => `<g class="part" style="--k:${k}"><g class="pt">${body}</g>
-      <g class="lbl ${side}" style="--i:${k + 2}"><path d="M200 ${side === 'up' ? 118 : 302} V${side === 'up' ? 84 : 336}"/><circle cx="200" cy="${side === 'up' ? 84 : 336}" r="2.500"/>
-      <text x="200" y="${side === 'up' ? 66 : 356}">${label}</text><text class="n" x="200" y="${side === 'up' ? 50 : 372}">${note}</text></g></g>`;
-  const rim = (fill, edge) => `<ellipse cx="208" cy="210" rx="26" ry="80" fill="${edge}"/><rect x="200" y="130" width="8" height="160" fill="${edge}"/><ellipse cx="200" cy="210" rx="26" ry="80" fill="${fill}"/>`;
-  function cupScene() {
-    return `<svg class="au-svg" viewBox="0 0 400 420" aria-hidden="true">
-        <g class="band"><path d="M214 132 C 250 20, 380 10, 392 150" fill="none" stroke="var(--au)" stroke-width="16" stroke-linecap="round"/><path d="M214 132 C 250 20, 380 10, 392 150" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".25"/></g>
-        ${disc(2, 'Aluminium shell', 'Machined, 0.8 mm', 'up', rim('var(--au)', '#0c0d10') + '<ellipse cx="200" cy="210" rx="15" ry="46" fill="none" stroke="#fff" stroke-width="1.500" opacity=".5"/><ellipse cx="200" cy="210" rx="4" ry="12" fill="#fff" opacity=".7"/>')}
-        ${disc(1, 'Battery and board', '30 hours per charge', 'down', rim('#1f6f55', '#0d2f25') + '<rect x="188" y="170" width="24" height="44" rx="5" fill="#d9dde3"/><rect x="192" y="224" width="16" height="12" rx="2" fill="#111"/><rect x="190" y="244" width="8" height="8" rx="1.500" fill="#f2b84b"/><rect x="202" y="244" width="8" height="8" rx="1.500" fill="#f2b84b"/>')}
-        ${disc(0, '40 mm driver', 'Titanium-coated', 'up', rim('#3a3d44', '#101114') + [60, 44, 28].map((r, i) => `<ellipse cx="200" cy="210" rx="${r / 3}" ry="${r}" fill="none" stroke="${['#6b707a', '#c58a3a', '#8b909a'][i]}" stroke-width="${i === 1 ? 4 : 2}"/>`).join('') + '<ellipse cx="200" cy="210" rx="5" ry="14" fill="#c9ccd3"/>')}
-        ${disc(-1, 'Acoustic mesh', 'Tuned for clarity', 'down', rim('#24262b', '#0c0d10') + [-52, -36, -20, -4, 12, 28, 44].map((y) => [-9, 0, 9].map((x) => `<circle cx="${200 + x}" cy="${210 + y + (x ? 4 : 0)}" r="2" fill="#5b606a"/>`).join('')).join(''))}
-        ${disc(-2, 'Memory foam', 'Cooling gel layer', 'up', '<ellipse cx="210" cy="210" rx="30" ry="88" fill="#0b0c0e"/><rect x="200" y="122" width="10" height="176" fill="#0b0c0e"/><ellipse cx="200" cy="210" rx="30" ry="88" fill="#34373e"/><ellipse cx="200" cy="210" rx="16" ry="54" fill="#0f1013"/><ellipse cx="196" cy="180" rx="6" ry="30" fill="#fff" opacity=".07"/>')}
-      </svg>`;
+  /* ── Auro: 3D over-ear headphones ──────────────────────────────────── */
+  const disc = (u, s, c, cls) => `<i class="dsc ${cls || ''}" style="--u:${n(u)};--s:${n(s)};--c:${c}"></i>`;
+  const tone = (pct, to) => `color-mix(in srgb, var(--au) ${Math.round(pct)}%, ${to})`;
+  /* One ear cup, sliced along its axis: cushion, mesh, driver, board, shell. */
+  function cup(side) {
+    let cushion = '', shell = '';
+    for (let i = 0; i < 9; i++) { const t = i / 8, bulge = Math.sin(t * Math.PI); cushion += disc(-1.62 + t * 1.3, 0.9 + bulge * 0.1, `color-mix(in srgb, var(--pad) ${Math.round(70 + bulge * 30)}%, #000)`, 'ring'); }
+    for (let i = 0; i < 16; i++) { const t = i / 15; shell += disc(-0.32 + t * 1.84, 1 - 0.36 * Math.pow(t, 2.4), t < 0.5 ? tone(100 - t * 30, '#000') : tone(100 - (1 - t) * 26, '#fff')); }
+    return `<div class="cup ${side}">
+        <div class="lay" style="--k:-6.4">${cushion}</div>
+        <div class="lay" style="--k:-3.2">${disc(-0.36, 0.72, '#17181c', 'mesh')}</div>
+        <div class="lay" style="--k:0">${disc(-0.2, 0.8, '#2b2e34', 'driver')}</div>
+        <div class="lay" style="--k:3.2">${disc(-0.06, 0.8, '#1f6f55', 'board')}</div>
+        <div class="lay" style="--k:6.4">${shell}${disc(1.54, 0.62, tone(86, '#fff'), 'cap')}${side === 'L'
+          ? cube(0.5, -3.4, -1.05, 0.5, 0.3, 0.7, '#e3e6ea', 'btn b1 six') + cube(0.5, -3.62, 0.1, 0.5, 0.3, 1, '#e3e6ea', 'btn b2 six') + cube(0.5, -3.4, 1.25, 0.5, 0.22, 0.6, '#101114', 'btn b3 six')
+          : ''}</div>
+        ${cube(0.75, 3.05, 0, 0.42, 2.7, 0.8, '#cfd3d9', 'yoke six')}${cube(0.75, 2.75, 0, 0.6, 0.6, 1.1, 'var(--au)', 'hinge six')}
+      </div>`;
   }
-  const COLORS = [['Graphite', '#6d7480'], ['Sand', '#c9a37a'], ['Forest', '#2f7d5c'], ['Ember', '#d5563a']];
+  function band() {
+    const R = 5.3, cy = 5.4, N = 30;
+    let s = '';
+    for (let i = 0; i < N; i++) {
+      const a = (i + 0.5) / N * Math.PI, deg = a * 180 / Math.PI, top = Math.sin(a);
+      s += cube(n(R * Math.cos(a)), n(cy + R * Math.sin(a) - 0.21), 0, n(R * Math.PI / N * 1.12), 0.42, 2 + top * 0.3, tone(100 - (1 - top) * 18, '#000'), 'bseg six', `--rz:${n(-(deg + 90))}deg`);
+      if (deg > 38 && deg < 142) s += cube(n((R - 0.42) * Math.cos(a)), n(cy + (R - 0.42) * Math.sin(a) - 0.2), 0, n((R - 0.42) * Math.PI / N * 1.14), 0.4, 1.9 + top * 0.25, 'var(--pad)', 'bseg pad six', `--rz:${n(-(deg + 90))}deg`);
+    }
+    return s;
+  }
+  const phones = () => `<div class="hp"><div class="hp-world">${band()}${cup('L')}${cup('R')}</div></div>`;
+  /* Labels sit at (x, y) in the stage box and point at (tx, ty), both in percent. */
+  const tags = (cls, list) => `<svg class="hp-lines ${cls}" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${list.map((t) => `<path d="M${t[0]} ${t[1] + (t[3] > t[1] ? 4.500 : -1.500)} L${t[2]} ${t[3]}" vector-effect="non-scaling-stroke"/>`).join('')}</svg>` +
+    list.map((t) => `<i class="hp-dot ${cls}" style="left:${t[2]}%;top:${t[3]}%"></i><div class="hp-tag ${cls}" style="left:${t[0]}%;top:${t[1]}%"><b>${t[4]}</b><small>${t[5]}</small></div>`).join('');
+
+  const COLORS = [['Sand', '#ddd2bf', '#7c9076'], ['Graphite', '#474c56', '#202227'], ['Sage', '#9db39a', '#4f6350'], ['Ember', '#d5563a', '#2a2422']];
   const TUNES = { Balanced: [50, 55, 60, 58, 52, 50], Bass: [92, 80, 58, 46, 44, 48], Vocal: [36, 48, 78, 88, 70, 50], Bright: [40, 44, 56, 70, 86, 94] };
   P.IDEAS.auro = {
-    key: 'auro', kind: 'site', name: 'Auro', mark: 'A', accent: '#6d7480', domain: 'auro.preview', cls: 'x-auro',
+    key: 'auro', kind: 'site', name: 'Auro', mark: 'A', accent: '#8a909b', domain: 'auro.preview', cls: 'x-auro',
     prompt: 'A product website for a headphone company where the headphones come apart into labelled parts as you scroll.',
     cta: 'Pre-order', ctaGo: 'order',
-    screens: [{ key: 'home', name: 'Home', desc: 'Scroll story: exploded view' }, { key: 'sound', name: 'Sound', desc: 'Tuning presets and specs' }, { key: 'order', name: 'Pre-order', desc: 'Colour, quantity, engraving' }, { key: 'sent', name: 'Confirmation', desc: 'Pre-order placed' }],
+    screens: [{ key: 'home', name: 'Home', desc: '3D story: explode, controls, return' }, { key: 'sound', name: 'Sound', desc: 'Tuning presets and specs' }, { key: 'order', name: 'Pre-order', desc: 'Colour, quantity, engraving' }, { key: 'sent', name: 'Confirmation', desc: 'Pre-order placed' }],
     taps: ['Sound link', 'Pre-order', 'Place pre-order'],
     init: () => ({ col: 0, qty: 1, tune: 'Balanced' }),
     act(st, a, arg) {
@@ -122,28 +231,35 @@
       const swatches = `<div class="au-swatches">${COLORS.map((x, i) => `<button data-act="col:${i}" style="--c:${x[1]}"${i === st.col ? ' class="on"' : ''} aria-label="${x[0]}"></button>`).join('')}</div>`;
       let body;
       if (key === 'home') body = `<section class="j-wrap au" data-journey><div class="j-stage">
-            ${cupScene()}
+            <div class="hp-box">${phones()}
+              ${tags('x', [[19, 31, 18, 44, 'Memory foam', 'Cooling gel layer'], [35, 84, 35, 70, 'Acoustic mesh', 'Tuned for clarity'], [49, 31, 49, 46, '40 mm driver', 'Titanium-coated'], [63, 84, 63, 74, 'Battery and board', '30 hours per charge'], [80, 31, 76, 46, 'Shell', 'Recycled aluminium']])}
+              ${tags('k', [[50, 90, 68, 72, 'Power', 'Hold 2 s to pair'], [74, 97, 72, 76, 'Noise control', 'Cancel or ambient'], [92, 88, 75.500, 77, 'USB-C', '5 min gives 4 h'], [84, 36, 74, 55, 'Touch panel', 'Swipe and tap']])}
+            </div>
             ${caption(1, 'Auro One', 'Hear everything.', 'Scroll to open it up and see what is inside.')}
             ${caption(2, 'Inside', 'Five layers. Nothing wasted.', 'Each part is tuned to the one beside it, from the foam to the shell.')}
-            ${caption(3, '248 g', 'Back together, it disappears.', 'Light enough to forget you are wearing it.')}
+            ${caption(3, 'Controls', 'Everything within reach.', 'Three buttons underneath, and a touch panel on the right cup.')}
             <span class="j-hint">${ic('right')}Scroll</span>
           </div></section>
           <section class="s-sec"><span class="s-tag">Finish</span><h2>${c[0]}</h2>${swatches}</section>
           <section class="s-points">${[['moon', 'Adaptive noise cancelling', 'Six microphones read the room 800 times a second.'], ['bolt', '30 hours, 5-minute top-up', 'Five minutes on the cable gives four hours.'], ['layers', 'Two devices at once', 'Laptop and phone, without re-pairing.']].map((p) => `<div><i>${ic(p[0])}</i><b>${p[1]}</b><small>${p[2]}</small></div>`).join('')}</section>
-          <section class="x-price dark"><small>Auro One</small><b>${money(1890)}</b><button class="p-btn" data-go="order">Pre-order</button></section>`;
+          <section class="j-wrap au2" data-journey><div class="j-stage">
+            <div class="hp-box">${phones()}</div>
+            <div class="au2-list">${[['248 g', 'Light enough to forget'], ['30 h', 'Battery with noise cancelling on'], ['40 mm', 'Titanium-coated drivers'], ['6 mics', 'For calls and noise control']].map((x, i) => `<div style="--i:${i}"><b>${x[0]}</b><small>${x[1]}</small></div>`).join('')}</div>
+            <div class="au2-buy"><small>Auro One</small><b>${money(1890)}</b><button class="p-btn" data-go="order">Pre-order</button></div>
+          </div></section>`;
       else if (key === 'sound') body = `<section class="s-sec"><span class="s-tag">Sound</span><h1>Tune it your way.</h1><p class="s-lead">Pick a profile and watch the curve change.</p>
           <div class="p-chips">${Object.keys(TUNES).map((t) => `<button data-act="tune:${t}"${st.tune === t ? ' class="on"' : ''}>${t}</button>`).join('')}</div>
           <div class="p-chart eq">${TUNES[st.tune].map((v, i) => `<div><i style="height:${v}%"></i><small>${['60', '250', '1k', '4k', '8k', '16k'][i]}</small></div>`).join('')}</div>
           <div class="p-rows">${[['Driver', '40 mm titanium-coated'], ['Frequency', '5 Hz to 40 kHz'], ['Battery', '30 hours with ANC'], ['Weight', '248 g'], ['Codec', 'LDAC, AAC, SBC']].map((r) => `<div><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div>
           <button class="p-btn" data-go="order">Pre-order</button></section>`;
-      else if (key === 'order') body = `<section class="s-sec narrow"><h1>Pre-order</h1><div class="au-mini">${cupScene()}</div>
+      else if (key === 'order') body = `<section class="s-sec narrow"><h1>Pre-order</h1><div class="au-mini"><div class="hp-box">${phones()}</div></div>
           <div class="p-head"><h3>Finish: ${c[0]}</h3></div>${swatches}
           <div class="p-between"><b>Quantity</b>${K.stepper('qty', st.qty)}</div>
           ${K.field('Engraving (optional)')}
           <div class="p-rows"><div><span>Ships</span><b>February</b></div><div><span>Total</span><b>${money(1890 * st.qty)}</b></div></div>
           <button class="p-btn" data-go="sent">Place pre-order</button></section>`;
       else body = K.sent('Pre-order placed', `${st.qty} × Auro One in ${c[0]}. You will not be charged until it ships.`);
-      return `<div class="au-root" style="--au:${c[1]}">` + K.siteNav(d, key, [['home', 'Auro One'], ['sound', 'Sound']]) + `<div class="s-body">${body}</div>` + K.siteFoot(d) + '</div>';
+      return `<div class="au-root" style="--au:${c[1]};--pad:${c[2]}">` + K.siteNav(d, key, [['home', 'Auro One'], ['sound', 'Sound']]) + `<div class="s-body">${body}</div>` + K.siteFoot(d) + '</div>';
     }
   };
 })();
