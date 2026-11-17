@@ -56,13 +56,17 @@
   function paintIcons(root) { $$('[data-icon]', root).forEach((el) => { el.innerHTML = icon(el.dataset.icon); }); }
 
   /* ── Settings ──────────────────────────────────────────────────────── */
-  const settings = Object.assign({ mode: 'system', accent: 'coral', device: 'iphone', unlockAnim: true, enterSend: true, search: false, shot: '1k' },
+  const settings = Object.assign({ mode: 'system', accent: 'coral', device: 'iphone', unlockAnim: true, enterSend: true, search: false, shot: '1k',
+    reduceMotion: false, siteDevice: 'laptop', gifSpeed: 'normal', planMode: true, askForms: true, suggestions: true, memory: true, agentModel: 'auto',
+    nRender: true, nHandoff: true, nStamina: true, nNews: false, nChannel: 'push', prDefault: true, pushDocs: true, handoffWhat: 'screens', autoHandoff: false, telemetry: true },
     (() => { try { return JSON.parse(localStorage.getItem('selasi-settings') || '{}'); } catch (_) { return {}; } })());
   function saveSettings() { try { localStorage.setItem('selasi-settings', JSON.stringify(settings)); } catch (_) { /* private mode */ } }
   function applySettings() {
     const sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
     document.documentElement.dataset.mode = settings.mode === 'system' ? sys : settings.mode;
     document.documentElement.dataset.accent = settings.accent;
+    document.documentElement.dataset.motion = settings.reduceMotion ? 'reduce' : 'full';
+    document.body.classList.toggle('no-suggest', !settings.suggestions);
     $$('[data-setting]').forEach((el) => {
       const key = el.dataset.setting;
       if (el.classList.contains('switch')) el.setAttribute('aria-checked', String(!!settings[key]));
@@ -78,7 +82,7 @@
     else {
       const b = e.target.closest('button[data-val]');
       if (!b) return;
-      if (b.hasAttribute('data-locked')) { toast('2K and above is for paid plans.'); return; }
+      if (b.hasAttribute('data-locked')) { toast(b.dataset.locked || 'This option is for paid plans.'); return; }
       settings[key] = b.dataset.val;
     }
     saveSettings(); applySettings();
@@ -95,6 +99,7 @@
 
   /* ── Toast ─────────────────────────────────────────────────────────── */
   let toastTimer = 0;
+  window.SelasiToast = (m) => toast(m);
   function toast(msg) {
     const t = $('toast');
     t.textContent = msg;
@@ -126,7 +131,7 @@
     pop.hidden = !pop.hidden;
   }));
   document.addEventListener('click', (e) => { if (!pop.hidden && !e.target.closest('#staminaPop')) pop.hidden = true; });
-  $('stMore').addEventListener('click', () => { pop.hidden = true; openSettings(); $('planSection').scrollIntoView(); });
+  $('stMore').addEventListener('click', () => { pop.hidden = true; openSettings('plan'); });
 
   /* ── Trays (slide-out controls) ────────────────────────────────────── */
   function setTray(tray, trigger, open) {
@@ -372,6 +377,7 @@
   }
 
   async function render() {
+    if (chat.idea.kind === 'site' && settings.siteDevice === 'laptop' && !small.matches && ui.device !== 'laptop') { ui.device = 'laptop'; syncContext(); mountDevice(); }
     const idea = chat.idea;
     const steps = ['Mapping the flow', 'Picking patterns from the library', `Composing ${idea.screens.length} ${noun()}`, idea.kind === 'site' ? 'Opening it in the browser' : 'Wiring the taps'];
     const card = addBlock(`<div class="tool-head"><span data-icon="phone"></span><b>Rendering on ${esc(DEVICE_LABEL[ui.device])}</b><span class="spin"></span></div>
@@ -453,7 +459,8 @@
       if (!chat.idea) {
         chat.idea = pickIdea(text);
         chat.accentIdx = Math.max(0, Proto.ACCENTS.indexOf(chat.idea.accent));
-        await replyPlan();
+        if (settings.planMode) await replyPlan();
+        else { syncContext(); await say(`Plan-first is off, so I am going straight to the device with <b>${esc(chat.idea.name)}</b>.`); await render(); }
       } else if (/hand ?off|coder|export|build it/.test(t)) {
         if (!chat.rendered) { await say('Render it first, then I can package the plan and screens for Coder.'); setChips(['Render it on the device']); }
         else { await say('Here is the package Coder will receive. Review the plan and the handoff record before you send it.'); setChips(afterRender()); closeAsk(); openHandoff(); }
@@ -594,7 +601,12 @@
   });
 
   /* ── Settings page ─────────────────────────────────────────────────── */
-  function openSettings() { closeSide(); pop.hidden = true; $('settings').hidden = false; }
+  function openSettings(section) {
+    closeSide(); pop.hidden = true; $('settings').hidden = false;
+    if (window.SelasiSettings) window.SelasiSettings.show(typeof section === 'string' ? section : null);
+  }
+  window.SelasiApplySettings = () => applySettings();
+  window.SelasiRefreshStamina = () => addUsage(0);
   function closeSettings() { $('settings').hidden = true; }
   $$('.js-settings').forEach((b) => b.addEventListener('click', openSettings));
   $('settingsClose').addEventListener('click', closeSettings);
@@ -688,7 +700,7 @@ ${idea.screens.map((s, i) => '- ' + path(s, i)).join('\n')}
     await unlock();
     $('gifBtn').classList.add('on');
     const mine = chat;
-    for (let i = 0; i < chat.idea.screens.length && chat === mine; i++) { ui.proto.go(i); await wait(900); }
+    for (let i = 0; i < chat.idea.screens.length && chat === mine; i++) { ui.proto.go(i); await wait({ slow: 1500, normal: 900, fast: 500 }[settings.gifSpeed] || 900); }
     $('gifBtn').classList.remove('on');
     playing = false;
     toast('Flow played end to end. This is the path a flow GIF will record.');

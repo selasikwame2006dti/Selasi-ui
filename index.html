@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="assets/css/device-lockscreens.css">
   <link rel="stylesheet" href="assets/css/app.css">
   <link rel="stylesheet" href="assets/css/stories.css">
+  <link rel="stylesheet" href="assets/css/settings.css">
   <script>
     (function () {
       var s = {};
@@ -201,59 +202,7 @@
   </div>
 
   <!-- Settings -->
-  <div class="page" id="settings" hidden>
-    <div class="page-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-      <div class="page-head">
-        <button class="icon-btn small" id="settingsClose" aria-label="Back"><span data-icon="back"></span></button>
-        <h2 id="settingsTitle">Settings</h2>
-      </div>
-      <div class="page-body">
-        <section>
-          <h3>Appearance</h3>
-          <div class="row"><div><b>Theme</b><small>Follow your device or pick one</small></div>
-            <div class="seg" data-setting="mode"><button data-val="system">System</button><button data-val="light">Light</button><button data-val="dark">Dark</button></div></div>
-          <div class="row"><div><b>Accent</b><small>Used for highlights and active states</small></div>
-            <div class="swatches" data-setting="accent"><button data-val="coral" style="--c:#ff7a59" aria-label="Coral"></button><button data-val="cyan" style="--c:#19b8d1" aria-label="Cyan"></button><button data-val="violet" style="--c:#8b7cf6" aria-label="Violet"></button><button data-val="green" style="--c:#3fb37f" aria-label="Green"></button></div></div>
-        </section>
-        <section>
-          <h3>Device</h3>
-          <div class="row"><div><b>Default device</b><small>What new chats open with</small></div>
-            <div class="seg" data-setting="device"><button data-val="iphone">iPhone</button><button data-val="android">Samsung</button><button data-val="tablet">iPad</button></div></div>
-          <div class="row"><div><b>Unlock animation</b><small>Play the lock screen reveal when a prototype loads</small></div>
-            <button class="switch" data-setting="unlockAnim" role="switch"></button></div>
-        </section>
-        <section>
-          <h3>Chat</h3>
-          <div class="row"><div><b>Enter sends the message</b><small>Shift and Enter adds a new line</small></div>
-            <button class="switch" data-setting="enterSend" role="switch"></button></div>
-          <div class="row"><div><b>Web search by default</b><small>Search and cite sources without being asked</small></div>
-            <button class="switch" data-setting="search" role="switch"></button></div>
-        </section>
-        <section id="planSection">
-          <h3>Plan and stamina</h3>
-          <div class="plan-now"><div><b>Free plan</b><small><span id="stPct2">100%</span> stamina left today</small></div><div class="st-bar"><i class="js-stbar"></i></div></div>
-          <div class="plans">
-            <button data-toast="Top-ups are not wired up in this concept build."><b>Top up</b><span>GH₵ 20</span><small>Pay as you go</small></button>
-            <button data-toast="Plans are not wired up in this concept build."><b>Starter</b><span>GH₵ 150</span><small>per month</small></button>
-            <button data-toast="Plans are not wired up in this concept build."><b>Pro</b><span>GH₵ 250</span><small>per month</small></button>
-          </div>
-          <p class="hint">Stamina is shared with Selasi Coder.</p>
-        </section>
-        <section>
-          <h3>Captures</h3>
-          <div class="row"><div><b>Screenshot size</b><small>2K and above is for paid plans</small></div>
-            <div class="seg" data-setting="shot"><button data-val="1k">1K</button><button data-val="2k" data-locked>2K</button></div></div>
-        </section>
-        <section>
-          <h3>Privacy</h3>
-          <p class="hint">Selasi reads only what you give it for the task. Chats in this concept build stay in this browser tab.</p>
-          <div class="row"><div><b>Clear all chats</b><small>Removes every chat and project from this tab</small></div>
-            <button class="soft-btn danger" id="clearChats"><span data-icon="trash"></span>Clear</button></div>
-        </section>
-        <p class="hint center">Selasi AI concept build. Replies are scripted.</p>
-      </div>
-    </div>
-  </div>
+  <div class="page" id="settings" hidden></div>
 
   <!-- Handoff -->
   <div class="modal" id="handoffModal" hidden>
@@ -287,6 +236,7 @@
   <script src="assets/js/art.js"></script>
   <script src="assets/js/prototype.js"></script>
   <script src="assets/js/stories.js"></script>
+  <script src="assets/js/settings.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>
